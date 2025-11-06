@@ -7,44 +7,73 @@ $warning-color: #ffb74d;
 $light-bg: #f8f9fa;
 
 // Contenedor principal
-.usuario-list {
+.cita-list-container {
   background-color: $light-bg;
   padding: 2rem;
   border-radius: 1rem;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  max-width: 1100px;
+  margin: 0 auto;
+}
 
-  .card {
-    border: none;
-    border-radius: 1rem;
-    overflow: hidden;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+.title {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: $primary-color;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+// Filtros y acciones
+.actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  input {
+    border: 1px solid #cddbd0;
+    border-radius: 0.4rem;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.95rem;
+    width: 250px;
   }
 
-  .card-header {
+  button {
+    border: none;
+    border-radius: 0.4rem;
+    padding: 0.5rem 0.9rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary {
     background-color: $primary-color;
     color: white;
-    padding: 1rem 1.5rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    .btn-success {
-      background-color: $accent-color;
-      border: none;
-      font-weight: 600;
-
-      &:hover {
-        background-color: darken($accent-color, 8%);
-      }
+    &:hover {
+      background-color: darken($primary-color, 8%);
     }
   }
 
-  .card-body {
-    padding: 1.5rem;
+  .btn-secondary {
+    background-color: $secondary-color;
+    color: white;
+    &:hover {
+      background-color: darken($secondary-color, 8%);
+    }
   }
 }
 
-// Tabla de usuarios
+// Tabla de citas
 .table-responsive {
   overflow-x: auto;
   background-color: white;
@@ -78,38 +107,51 @@ tr:hover {
   transition: background-color 0.2s ease;
 }
 
-// Botones
-button {
+// Badges para estado o tipo de cita
+.badge {
+  padding: 0.25rem 0.6rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.badge-success {
+  background-color: $accent-color;
+  color: white;
+}
+
+.badge-warning {
+  background-color: $warning-color;
+  color: #212529;
+}
+
+.badge-danger {
+  background-color: $danger-color;
+  color: white;
+}
+
+// Botones de acción
+.btn-action {
   border: none;
   border-radius: 0.4rem;
-  padding: 0.5rem 0.9rem;
-  font-size: 0.9rem;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.3s ease;
+  margin-right: 0.4rem;
 }
 
-.btn-primary {
-  background-color: $primary-color;
-  color: white;
-
-  &:hover {
-    background-color: darken($primary-color, 8%);
-  }
-}
-
-.btn-secondary {
+.btn-edit {
   background-color: $secondary-color;
   color: white;
-
   &:hover {
     background-color: darken($secondary-color, 8%);
   }
 }
 
-.btn-danger {
+.btn-delete {
   background-color: $danger-color;
   color: white;
-
   &:hover {
     background-color: darken($danger-color, 8%);
   }
@@ -127,16 +169,12 @@ button {
     color: white;
     margin: 0 0.25rem;
     border-radius: 0.3rem;
+    padding: 0.4rem 0.75rem;
 
     &:disabled {
       background-color: #c8d6c4;
       cursor: not-allowed;
     }
-  }
-
-  span {
-    font-weight: 600;
-    color: $primary-color;
   }
 }
 
@@ -219,36 +257,33 @@ button {
 // Formularios
 .form-group {
   margin-bottom: 1rem;
-
-  label {
-    display: block;
-    margin-bottom: 0.4rem;
-    font-weight: 600;
-    color: #333;
-  }
-
-  .form-control {
-    display: block;
-    width: 100%;
-    padding: 0.4rem 0.75rem;
-    font-size: 1rem;
-    color: #495057;
-    background-color: #fff;
-    border: 1px solid #cddbd0;
-    border-radius: 0.4rem;
-    transition: border-color 0.2s, box-shadow 0.2s;
-
-    &:focus {
-      border-color: $secondary-color;
-      outline: 0;
-      box-shadow: 0 0 0 0.2rem rgba($secondary-color, 0.25);
-    }
-  }
 }
 
-// Encabezado
-.card-title {
-  color: $primary-color;
-  font-weight: 700;
-  font-size: 1.5rem;
+.form-group label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.form-control {
+  display: block;
+  width: 100%;
+  padding: 0.4rem 0.75rem;
+  font-size: 1rem;
+  color: #495057;
+  background-color: #fff;
+  border: 1px solid #cddbd0;
+  border-radius: 0.4rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-control:focus {
+  border-color: $secondary-color;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba($secondary-color, 0.25);
+}
+
+select.form-control {
+  cursor: pointer;
 }

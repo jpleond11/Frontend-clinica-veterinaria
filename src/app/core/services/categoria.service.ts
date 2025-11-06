@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Categoria, CategoriaFilters, CreateCategoriaRequest, UpdateCategoriaRequest } from '../../shared/models/categoria.model';
+import { Categoria, CategoriaFilters, CreateCategoriaRequest, UpdateCategoriaRequest } from '../../shared/models/animal.model';
 import { ApiResponse, PaginatedResponse, PaginationParams } from '../models/api-response.model';
 import { ApiService } from './api.service';
 

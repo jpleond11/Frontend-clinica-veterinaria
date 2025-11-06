@@ -6,45 +6,7 @@ $danger-color: #e57373;
 $warning-color: #ffb74d;
 $light-bg: #f8f9fa;
 
-// Contenedor principal
-.usuario-list {
-  background-color: $light-bg;
-  padding: 2rem;
-  border-radius: 1rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-
-  .card {
-    border: none;
-    border-radius: 1rem;
-    overflow: hidden;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-  }
-
-  .card-header {
-    background-color: $primary-color;
-    color: white;
-    padding: 1rem 1.5rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    .btn-success {
-      background-color: $accent-color;
-      border: none;
-      font-weight: 600;
-
-      &:hover {
-        background-color: darken($accent-color, 8%);
-      }
-    }
-  }
-
-  .card-body {
-    padding: 1.5rem;
-  }
-}
-
-// Tabla de usuarios
+// Tabla
 .table-responsive {
   overflow-x: auto;
   background-color: white;
@@ -132,11 +94,6 @@ button {
       background-color: #c8d6c4;
       cursor: not-allowed;
     }
-  }
-
-  span {
-    font-weight: 600;
-    color: $primary-color;
   }
 }
 
@@ -246,7 +203,14 @@ button {
   }
 }
 
-// Encabezado
+// Contenedor principal
+.propietario-list-container {
+  background-color: $light-bg;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
 .card-title {
   color: $primary-color;
   font-weight: 700;

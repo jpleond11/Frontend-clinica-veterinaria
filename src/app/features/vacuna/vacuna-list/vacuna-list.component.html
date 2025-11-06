@@ -1,0 +1,181 @@
+<div class="vacuna-list-container">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h2 class="card-title">Gestión de Vacunas</h2>
+      <button class="btn btn-primary" (click)="openCreateModal()">
+        Nueva Vacuna
+      </button>
+    </div>
+
+    <div class="card-body">
+      <!-- Filtros -->
+      <div class="filters mb-3">
+        <div class="row">
+          <div class="col-md-4">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Buscar por nombre..."
+              [(ngModel)]="filters.nombre_vacuna"
+              (input)="onFilterChange()"
+            />
+          </div>
+
+          <div class="col-md-4">
+            <input
+              type="date"
+              class="form-control"
+              [(ngModel)]="filters.fecha_aplicacion_vacuna"
+              (change)="onFilterChange()"
+            />
+          </div>
+
+          <div class="col-md-2">
+            <button class="btn btn-secondary w-100" (click)="clearFilters()">
+              Limpiar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla de vacunas -->
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre Vacuna</th>
+              <th>Fecha Aplicación</th>
+              <th>Próxima Dosis</th>
+              <th>Fecha Creación</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="loading">
+              <td colspan="6" class="text-center">Cargando...</td>
+            </tr>
+
+            <tr *ngIf="!loading && vacunas.length === 0">
+              <td colspan="6" class="text-center">No hay vacunas registradas</td>
+            </tr>
+
+            <tr *ngFor="let vacuna of vacunas">
+              <td>{{ vacuna.id_vacuna }}</td>
+              <td>{{ vacuna.nombre_vacuna }}</td>
+              <td>{{ vacuna.fecha_aplicacion_vacuna | date:'mediumDate' }}</td>
+              <td>
+                {{ vacuna.proxima_dosis_vacuna ? (vacuna.proxima_dosis_vacuna | date:'mediumDate') : '-' }}
+              </td>
+              <td>{{ vacuna.fecha_creacion | date:'short' }}</td>
+              <td>
+                <button class="btn btn-sm btn-primary" (click)="editVacuna(vacuna)">
+                  Editar
+                </button>
+                <button class="btn btn-sm btn-danger" (click)="deleteVacuna(vacuna)">
+                  Eliminar
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      <div class="pagination mt-3" *ngIf="totalPages > 1">
+        <button
+          class="btn btn-secondary"
+          [disabled]="currentPage === 1"
+          (click)="goToPage(currentPage - 1)"
+        >
+          Anterior
+        </button>
+        <span class="mx-3">Página {{ currentPage }} de {{ totalPages }}</span>
+        <button
+          class="btn btn-secondary"
+          [disabled]="currentPage === totalPages"
+          (click)="goToPage(currentPage + 1)"
+        >
+          Siguiente
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para crear/editar vacuna -->
+  <div
+    class="modal fade"
+    [class.show]="showModal"
+    [style.display]="showModal ? 'block' : 'none'"
+    tabindex="-1"
+    role="dialog"
+  >
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            {{ editingVacuna ? 'Editar Vacuna' : 'Registrar Nueva Vacuna' }}
+          </h5>
+          <button type="button" class="close" (click)="closeModal()">
+            <span>&times;</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <form (ngSubmit)="saveVacuna()">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="nombre_vacuna">Nombre *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="nombre_vacuna"
+                    [(ngModel)]="vacunaForm.nombre_vacuna"
+                    name="nombre_vacuna"
+                    required
+                    placeholder="Ingrese el nombre de la vacuna"
+                  />
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="fecha_aplicacion_vacuna">Fecha de Aplicación *</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="fecha_aplicacion_vacuna"
+                    [(ngModel)]="vacunaForm.fecha_aplicacion_vacuna"
+                    name="fecha_aplicacion_vacuna"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="proxima_dosis_vacuna">Próxima Dosis</label>
+              <input
+                type="date"
+                class="form-control"
+                id="proxima_dosis_vacuna"
+                [(ngModel)]="vacunaForm.proxima_dosis_vacuna"
+                name="proxima_dosis_vacuna"
+              />
+            </div>
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeModal()">
+            Cancelar
+          </button>
+          <button type="button" class="btn btn-primary" (click)="saveVacuna()">
+            {{ editingVacuna ? 'Actualizar' : 'Registrar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

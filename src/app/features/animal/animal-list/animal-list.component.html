@@ -1,0 +1,236 @@
+<div class="animal-list-container">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h2 class="card-title">Gestión de Animales</h2>
+      <button class="btn btn-primary" (click)="openCreateModal()">
+        Nuevo Animal
+      </button>
+    </div>
+
+    <div class="card-body">
+      <!-- Filtros -->
+      <div class="filters mb-3">
+        <div class="row">
+          <div class="col-md-3">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Buscar por nombre..."
+              [(ngModel)]="filters.nombre_animal"
+              (input)="onFilterChange()"
+            />
+          </div>
+
+          <div class="col-md-3">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Buscar por especie..."
+              [(ngModel)]="filters.especie_animal"
+              (input)="onFilterChange()"
+            />
+          </div>
+
+          <div class="col-md-3">
+            <select
+              class="form-control"
+              [(ngModel)]="filters.categoria_id"
+              (change)="onFilterChange()"
+            >
+              <option value="">Todas las categorías</option>
+              <option *ngFor="let categoria of categorias" [value]="categoria.id_categoria">
+                {{ categoria.nombre_categoria }}
+              </option>
+            </select>
+          </div>
+
+          <div class="col-md-2">
+            <button class="btn btn-secondary w-100" (click)="clearFilters()">
+              Limpiar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla de animales -->
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Especie</th>
+              <th>Fecha Nacimiento</th>
+              <th>Propietario</th>
+              <th>Categoría</th>
+              <th>Fecha Creación</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="loading">
+              <td colspan="8" class="text-center">Cargando...</td>
+            </tr>
+
+            <tr *ngIf="!loading && animales.length === 0">
+              <td colspan="8" class="text-center">No hay animales registrados</td>
+            </tr>
+
+            <tr *ngFor="let animal of animales">
+              <td>{{ animal.id_animal }}</td>
+              <td>{{ animal.nombre_animal }}</td>
+              <td>{{ animal.especie_animal }}</td>
+              <td>{{ animal.fecha_nacimiento_animal | date:'mediumDate' }}</td>
+              <td>{{ animal.propietario?.nombre_completo || '-' }}</td>
+              <td>{{ animal.categoria?.nombre_categoria || '-' }}</td>
+              <td>{{ animal.fecha_creacion | date:'short' }}</td>
+              <td>
+                <button class="btn btn-sm btn-primary" (click)="editAnimal(animal)">
+                  Editar
+                </button>
+                <button class="btn btn-sm btn-danger" (click)="deleteAnimal(animal)">
+                  Eliminar
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      <div class="pagination mt-3" *ngIf="totalPages > 1">
+        <button
+          class="btn btn-secondary"
+          [disabled]="currentPage === 1"
+          (click)="goToPage(currentPage - 1)"
+        >
+          Anterior
+        </button>
+        <span class="mx-3">Página {{ currentPage }} de {{ totalPages }}</span>
+        <button
+          class="btn btn-secondary"
+          [disabled]="currentPage === totalPages"
+          (click)="goToPage(currentPage + 1)"
+        >
+          Siguiente
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para crear/editar animal -->
+  <div
+    class="modal fade"
+    [class.show]="showModal"
+    [style.display]="showModal ? 'block' : 'none'"
+    tabindex="-1"
+    role="dialog"
+  >
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            {{ editingAnimal ? 'Editar Animal' : 'Registrar Nuevo Animal' }}
+          </h5>
+          <button type="button" class="close" (click)="closeModal()">
+            <span>&times;</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <form (ngSubmit)="saveAnimal()">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="nombre_animal">Nombre *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="nombre_animal"
+                    [(ngModel)]="animalForm.nombre_animal"
+                    name="nombre_animal"
+                    required
+                    placeholder="Ingrese el nombre del animal"
+                  />
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="especie_animal">Especie *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="especie_animal"
+                    [(ngModel)]="animalForm.especie_animal"
+                    name="especie_animal"
+                    required
+                    placeholder="Ejemplo: Canino, Felino..."
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="fecha_nacimiento_animal">Fecha de Nacimiento</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="fecha_nacimiento_animal"
+                    [(ngModel)]="animalForm.fecha_nacimiento_animal"
+                    name="fecha_nacimiento_animal"
+                  />
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="categoria_id">Categoría *</label>
+                  <select
+                    class="form-control"
+                    id="categoria_id"
+                    [(ngModel)]="animalForm.categoria_id"
+                    name="categoria_id"
+                    required
+                  >
+                    <option value="">Seleccione una categoría</option>
+                    <option *ngFor="let categoria of categorias" [value]="categoria.id_categoria">
+                      {{ categoria.nombre_categoria }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="propietario_id">Propietario *</label>
+              <select
+                class="form-control"
+                id="propietario_id"
+                [(ngModel)]="animalForm.propietario_id"
+                name="propietario_id"
+                required
+              >
+                <option value="">Seleccione un propietario</option>
+                <option *ngFor="let propietario of propietarios" [value]="propietario.id_propietario">
+                  {{ propietario.nombre_completo }}
+                </option>
+              </select>
+            </div>
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeModal()">
+            Cancelar
+          </button>
+          <button type="button" class="btn btn-primary" (click)="saveAnimal()">
+            {{ editingAnimal ? 'Actualizar' : 'Registrar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
