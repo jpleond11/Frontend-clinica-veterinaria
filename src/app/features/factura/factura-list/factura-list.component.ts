@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { PaginationParams } from '../../../core/models/api-response.model';
+import { PaginationParams, ApiResponse } from '../../../core/models/api-response.model';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FacturaService } from '../../../core/services/factura.service';
 import { CitaService } from '../../../core/services/cita.service';
 import { Factura, FacturaFilters } from '../../../shared/models/factura.model';
@@ -66,9 +67,21 @@ export class FacturaListComponent implements OnInit {
   }
 
   loadCitas(): void {
-    this.citaService.getCitas().subscribe({
-      next: (data: any) => (this.citas = data),
-      error: (err: any) => console.error('Error al cargar citas:', err)
+    this.loading = true;
+    const pagination: PaginationParams = {
+      page: this.currentPage,
+      limit: this.pageSize
+    };
+    this.citaService.getCitas(pagination).subscribe({
+      next: (response: ApiResponse<Cita[]>) => {
+        this.citas = response.data;
+        this.totalPages = Math.ceil(this.citas.length / this.pageSize);
+        this.loading = false;
+      },
+      error: (err: HttpErrorResponse | any) => {
+        console.error('Error al cargar citas:', err);
+        this.loading = false;
+      }
     });
   }
 

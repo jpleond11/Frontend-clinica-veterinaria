@@ -60,7 +60,7 @@
               <td>{{ cita.motivo_cita }}</td>
               <td>{{ cita.animal?.nombre_animal || '-' }}</td>
               <td>{{ cita.vacuna?.nombre_vacuna || '-' }}</td>
-              <td>{{ cita.veterinario?.nombre_veterinario || '-' }}</td>
+              <td>{{ getVeterinarioNombre(cita.veterinario) }}</td>
               <td>
                 <button class="btn btn-sm btn-primary" (click)="editCita(cita)">
                   Editar
@@ -207,7 +207,7 @@
                   >
                     <option value="">Seleccione un veterinario</option>
                     <option *ngFor="let vet of veterinarios" [value]="vet.id_veterinario">
-                      {{ vet.nombre_veterinario }}
+                      {{ getVeterinarioNombre(vet) }}
                     </option>
                   </select>
                 </div>

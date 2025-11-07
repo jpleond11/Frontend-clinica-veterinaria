@@ -1,70 +1,110 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { ChangePasswordRequest, CreateUsuarioRequest, UpdateUsuarioRequest, Usuario, UsuarioFilters } from '../../shared/models/usuario.model';
-import { ApiResponse, PaginatedResponse, PaginationParams } from '../models/api-response.model';
-import { ApiService } from './api.service';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, map } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { Usuario, UsuarioFilters } from '../../shared/models/usuario.model';
+import {
+  ApiResponse,
+  PaginatedResponse,
+  PaginationParams
+} from '../models/api-response.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UsuarioService {
-  private readonly endpoint = '/usuarios';
+  private baseUrl = `${environment.apiUrl}/usuarios`;
 
-  constructor(private apiService: ApiService) { }
+  constructor(private http: HttpClient) {}
 
   /**
-   * Obtiene todos los usuarios con paginación
+   * Obtener lista de usuarios con soporte para filtros y paginación
    */
-  getUsuarios(pagination: PaginationParams, filters?: UsuarioFilters): Observable<PaginatedResponse<Usuario>> {
-    return this.apiService.getPaginated<Usuario>(this.endpoint, pagination, filters);
+  getUsuarios(
+    pagination: PaginationParams,
+    filters?: UsuarioFilters
+  ): Observable<PaginatedResponse<Usuario>> {
+    let params = new HttpParams()
+      .set('skip', ((pagination.page - 1) * pagination.limit).toString())
+      .set('limit', pagination.limit.toString());
+
+    // Por si se agregan más filtros en la API
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== '') {
+          params = params.set(key, value as string);
+        }
+      });
+    }
+
+    return this.http.get<Usuario[]>(this.baseUrl, { params }).pipe(
+      map((usuarios) => {
+        const total = usuarios.length;
+        const totalPages = Math.ceil(total / pagination.limit) || 1;
+
+        const response: PaginatedResponse<Usuario> = {
+          data: usuarios,
+          total,
+          page: pagination.page,
+          limit: pagination.limit,
+          totalPages
+        };
+        return response;
+      })
+    );
   }
 
   /**
-   * Obtiene un usuario por ID
+   * Obtener un usuario por ID
    */
-  getUsuarioById(id: number): Observable<ApiResponse<Usuario>> {
-    return this.apiService.get<Usuario>(`${this.endpoint}/${id}`);
+  getUsuarioById(id: string): Observable<Usuario> {
+    return this.http.get<Usuario>(`${this.baseUrl}/${id}`);
   }
 
   /**
-   * Crea un nuevo usuario
+   * Crear un nuevo usuario
    */
-  createUsuario(usuario: CreateUsuarioRequest): Observable<ApiResponse<Usuario>> {
-    return this.apiService.post<Usuario>(this.endpoint, usuario);
+  createUsuario(usuario: Partial<Usuario>): Observable<ApiResponse<Usuario>> {
+    return this.http.post<Usuario>(this.baseUrl, usuario).pipe(
+      map((data) => ({
+        data,
+        message: 'Usuario creado exitosamente',
+        success: true,
+        status: 201
+      }))
+    );
   }
 
   /**
-   * Actualiza un usuario existente
+   * Actualizar un usuario existente
    */
-  updateUsuario(id: number, usuario: UpdateUsuarioRequest): Observable<ApiResponse<Usuario>> {
-    return this.apiService.put<Usuario>(`${this.endpoint}/${id}`, usuario);
+  updateUsuario(
+    id: string,
+    usuario: Partial<Usuario>
+  ): Observable<ApiResponse<Usuario>> {
+    return this.http.put<Usuario>(`${this.baseUrl}/${id}`, usuario).pipe(
+      map((data) => ({
+        data,
+        message: 'Usuario actualizado exitosamente',
+        success: true,
+        status: 200
+      }))
+    );
   }
 
   /**
-   * Elimina un usuario
+   * Eliminar un usuario por ID
    */
-  deleteUsuario(id: number): Observable<ApiResponse<void>> {
-    return this.apiService.delete<void>(`${this.endpoint}/${id}`);
-  }
-
-  /**
-   * Cambia la contraseña de un usuario
-   */
-  changePassword(id: number, passwordData: ChangePasswordRequest): Observable<ApiResponse<void>> {
-    return this.apiService.post<void>(`${this.endpoint}/${id}/change-password`, passwordData);
-  }
-
-  /**
-   * Obtiene todos los usuarios activos (sin paginación)
-   */
-  getUsuariosActivos(): Observable<ApiResponse<Usuario[]>> {
-    return this.apiService.get<Usuario[]>(`${this.endpoint}/activos`);
-  }
-
-  /**
-   * Activa/desactiva un usuario
-   */
-  toggleUsuarioStatus(id: number, activo: boolean): Observable<ApiResponse<Usuario>> {
-    return this.apiService.patch<Usuario>(`${this.endpoint}/${id}/toggle-status`, { activo });
+  deleteUsuario(id: string): Observable<ApiResponse<null>> {
+    return this.http.delete<{ mensaje: string; exito: boolean }>(
+      `${this.baseUrl}/${id}`
+    ).pipe(
+      map((res) => ({
+        data: null,
+        message: res.mensaje || 'Usuario eliminado exitosamente',
+        success: res.exito,
+        status: 200
+      }))
+    );
   }
 }

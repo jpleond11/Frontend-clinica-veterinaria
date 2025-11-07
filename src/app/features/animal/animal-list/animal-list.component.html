@@ -10,40 +10,43 @@
     <div class="card-body">
       <!-- Filtros -->
       <div class="filters mb-3">
-        <div class="row">
+        <div class="row g-2">
           <div class="col-md-3">
             <input
               type="text"
               class="form-control"
-              placeholder="Buscar por nombre..."
+              placeholder="Nombre..."
               [(ngModel)]="filters.nombre_animal"
               (input)="onFilterChange()"
             />
           </div>
-
           <div class="col-md-3">
             <input
               type="text"
               class="form-control"
-              placeholder="Buscar por especie..."
+              placeholder="Especie..."
               [(ngModel)]="filters.especie_animal"
               (input)="onFilterChange()"
             />
           </div>
-
-          <div class="col-md-3">
-            <select
+          <div class="col-md-2">
+            <input
+              type="text"
               class="form-control"
-              [(ngModel)]="filters.categoria_id"
-              (change)="onFilterChange()"
-            >
-              <option value="">Todas las categorías</option>
-              <option *ngFor="let categoria of categorias" [value]="categoria.id_categoria">
-                {{ categoria.nombre_categoria }}
-              </option>
-            </select>
+              placeholder="ID Propietario..."
+              [(ngModel)]="filters.propietario_id"
+              (input)="onFilterChange()"
+            />
           </div>
-
+          <div class="col-md-2">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="ID Categoría..."
+              [(ngModel)]="filters.categoria_id"
+              (input)="onFilterChange()"
+            />
+          </div>
           <div class="col-md-2">
             <button class="btn btn-secondary w-100" (click)="clearFilters()">
               Limpiar
@@ -54,38 +57,34 @@
 
       <!-- Tabla de animales -->
       <div class="table-responsive">
-        <table class="table">
+        <table class="table table-striped">
           <thead>
             <tr>
               <th>ID</th>
               <th>Nombre</th>
               <th>Especie</th>
-              <th>Fecha Nacimiento</th>
-              <th>Propietario</th>
-              <th>Categoría</th>
-              <th>Fecha Creación</th>
+              <th>Fecha de Nacimiento</th>
+              <th>Propietario ID</th>
+              <th>Categoría ID</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngIf="loading">
-              <td colspan="8" class="text-center">Cargando...</td>
+              <td colspan="7" class="text-center">Cargando...</td>
             </tr>
-
             <tr *ngIf="!loading && animales.length === 0">
-              <td colspan="8" class="text-center">No hay animales registrados</td>
+              <td colspan="7" class="text-center">No hay animales registrados</td>
             </tr>
-
-            <tr *ngFor="let animal of animales">
+            <tr *ngFor="let animal of animales | slice:(currentPage-1)*pageSize:(currentPage)*pageSize">
               <td>{{ animal.id_animal }}</td>
               <td>{{ animal.nombre_animal }}</td>
               <td>{{ animal.especie_animal }}</td>
-              <td>{{ animal.fecha_nacimiento_animal | date:'mediumDate' }}</td>
-              <td>{{ animal.propietario?.nombre_completo || '-' }}</td>
-              <td>{{ animal.categoria?.nombre_categoria || '-' }}</td>
-              <td>{{ animal.fecha_creacion | date:'short' }}</td>
+              <td>{{ animal.fecha_nacimiento_animal | date:'yyyy-MM-dd' }}</td>
+              <td>{{ animal.propietario_id }}</td>
+              <td>{{ animal.categoria_id }}</td>
               <td>
-                <button class="btn btn-sm btn-primary" (click)="editAnimal(animal)">
+                <button class="btn btn-sm btn-warning" (click)="editAnimal(animal)">
                   Editar
                 </button>
                 <button class="btn btn-sm btn-danger" (click)="deleteAnimal(animal)">
@@ -139,7 +138,7 @@
 
         <div class="modal-body">
           <form (ngSubmit)="saveAnimal()">
-            <div class="row">
+            <div class="row g-2">
               <div class="col-md-6">
                 <div class="form-group">
                   <label for="nombre_animal">Nombre *</label>
@@ -150,7 +149,6 @@
                     [(ngModel)]="animalForm.nombre_animal"
                     name="nombre_animal"
                     required
-                    placeholder="Ingrese el nombre del animal"
                   />
                 </div>
               </div>
@@ -165,13 +163,10 @@
                     [(ngModel)]="animalForm.especie_animal"
                     name="especie_animal"
                     required
-                    placeholder="Ejemplo: Canino, Felino..."
                   />
                 </div>
               </div>
-            </div>
 
-            <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
                   <label for="fecha_nacimiento_animal">Fecha de Nacimiento</label>
@@ -187,37 +182,29 @@
 
               <div class="col-md-6">
                 <div class="form-group">
-                  <label for="categoria_id">Categoría *</label>
-                  <select
+                  <label for="propietario_id">ID Propietario</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="propietario_id"
+                    [(ngModel)]="animalForm.propietario_id"
+                    name="propietario_id"
+                  />
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="categoria_id">ID Categoría</label>
+                  <input
+                    type="number"
                     class="form-control"
                     id="categoria_id"
                     [(ngModel)]="animalForm.categoria_id"
                     name="categoria_id"
-                    required
-                  >
-                    <option value="">Seleccione una categoría</option>
-                    <option *ngFor="let categoria of categorias" [value]="categoria.id_categoria">
-                      {{ categoria.nombre_categoria }}
-                    </option>
-                  </select>
+                  />
                 </div>
               </div>
-            </div>
-
-            <div class="form-group">
-              <label for="propietario_id">Propietario *</label>
-              <select
-                class="form-control"
-                id="propietario_id"
-                [(ngModel)]="animalForm.propietario_id"
-                name="propietario_id"
-                required
-              >
-                <option value="">Seleccione un propietario</option>
-                <option *ngFor="let propietario of propietarios" [value]="propietario.id_propietario">
-                  {{ propietario.nombre_completo }}
-                </option>
-              </select>
             </div>
           </form>
         </div>

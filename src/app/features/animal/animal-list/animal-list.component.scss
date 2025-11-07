@@ -1,10 +1,25 @@
 // Paleta de colores veterinaria
-$primary-color: #2e8b57; // Verde principal (salud, naturaleza)
-$secondary-color: #4da6ff; // Azul claro (confianza, limpieza)
-$accent-color: #81c784; // Verde suave (tranquilidad)
+$primary-color: #2e8b57; // Verde principal
+$secondary-color: #4da6ff; // Azul claro
+$accent-color: #81c784; // Verde suave
 $danger-color: #e57373;
 $warning-color: #ffb74d;
 $light-bg: #f8f9fa;
+
+// Contenedor principal
+.animal-list-container {
+  background-color: $light-bg;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+// Título de la tarjeta
+.card-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: $primary-color;
+}
 
 // Badges
 .badge {
@@ -29,7 +44,7 @@ $light-bg: #f8f9fa;
   color: white;
 }
 
-// Tabla
+// Tabla de animales
 .table-responsive {
   overflow-x: auto;
   background-color: white;
@@ -76,28 +91,37 @@ button {
 .btn-primary {
   background-color: $primary-color;
   color: white;
-}
 
-.btn-primary:hover {
-  background-color: darken($primary-color, 8%);
+  &:hover {
+    background-color: darken($primary-color, 8%);
+  }
 }
 
 .btn-secondary {
   background-color: $secondary-color;
   color: white;
-}
 
-.btn-secondary:hover {
-  background-color: darken($secondary-color, 8%);
+  &:hover {
+    background-color: darken($secondary-color, 8%);
+  }
 }
 
 .btn-danger {
   background-color: $danger-color;
   color: white;
+
+  &:hover {
+    background-color: darken($danger-color, 8%);
+  }
 }
 
-.btn-danger:hover {
-  background-color: darken($danger-color, 8%);
+.btn-warning {
+  background-color: $warning-color;
+  color: #212529;
+
+  &:hover {
+    background-color: darken($warning-color, 8%);
+  }
 }
 
 // Paginación
@@ -199,13 +223,13 @@ button {
 // Formularios
 .form-group {
   margin-bottom: 1rem;
-}
 
-.form-group label {
-  display: block;
-  margin-bottom: 0.4rem;
-  font-weight: 600;
-  color: #333;
+  label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-weight: 600;
+    color: #333;
+  }
 }
 
 .form-control {
@@ -218,39 +242,30 @@ button {
   border: 1px solid #cddbd0;
   border-radius: 0.4rem;
   transition: border-color 0.2s, box-shadow 0.2s;
-}
 
-.form-control:focus {
-  border-color: $secondary-color;
-  outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba($secondary-color, 0.25);
+  &:focus {
+    border-color: $secondary-color;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba($secondary-color, 0.25);
+  }
 }
 
 .form-check {
   display: flex;
   align-items: center;
+
+  .form-check-input {
+    margin-right: 0.5rem;
+  }
+
+  .form-check-label {
+    color: #495057;
+  }
 }
 
-.form-check-input {
-  margin-right: 0.5rem;
-}
-
-.form-check-label {
-  color: #495057;
-}
-
-// Estilo general del listado
-.animal-list-container {
-  background-color: $light-bg;
-  padding: 2rem;
-  border-radius: 1rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-}
-
-.title {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: $primary-color;
-  margin-bottom: 1.5rem;
-  text-align: center;
+// Filtros
+.filters {
+  .row > div {
+    margin-bottom: 0.5rem;
+  }
 }

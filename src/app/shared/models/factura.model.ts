@@ -50,6 +50,7 @@ export interface UpdateFacturaRequest {
 export interface FacturaFilters {
   monto_factura_min?: number;
   monto_factura_max?: number;
+  descripcion_factura?: string;
   cita_id?: string;
   fecha_desde?: string;
   fecha_hasta?: string;

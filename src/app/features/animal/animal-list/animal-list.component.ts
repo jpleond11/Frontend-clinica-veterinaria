@@ -2,11 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-import { PaginationParams, ApiResponse } from '../../../core/models/api-response.model';
 import { AnimalService } from '../../../core/services/animal.service';
-import { PropietarioService } from '../../../core/services/propietario.service';
-import { Animal, AnimalFilters, CreateAnimalRequest, UpdateAnimalRequest } from '../../../shared/models/animal.model';
-import { Propietario } from '../../../shared/models/propietario.model';
+import { Animal, AnimalFilters } from '../../../shared/models/animal.model';
+import { PaginationParams, PaginatedResponse } from '../../../core/models/api-response.model';
 
 @Component({
   selector: 'app-animal-list',
@@ -17,52 +15,52 @@ import { Propietario } from '../../../shared/models/propietario.model';
 })
 export class AnimalListComponent implements OnInit {
   animales: Animal[] = [];
-  propietarios: Propietario[] = [];
   loading = false;
+
+  // Paginación
   currentPage = 1;
   totalPages = 1;
   pageSize = 10;
 
-  filters: AnimalFilters = {};
+  // Filtros
+  filters: AnimalFilters = {
+    nombre_animal: '',
+    especie_animal: '',
+    propietario_id: '',
+    categoria_id: '',
+    fecha_desde: '',
+    fecha_hasta: ''
+  };
 
   // Modal
   showModal = false;
   editingAnimal: Animal | null = null;
-
-  // Tipado del formulario
-  animalForm: CreateAnimalRequest | UpdateAnimalRequest = {
+  animalForm: Partial<Animal> = {
     nombre_animal: '',
     especie_animal: '',
-    fecha_nacimiento_animal: '',
-    propietario_id: '',
-    categoria_id: '',
+    fecha_nacimiento_animal: undefined,
+    propietario_id: undefined,
+    categoria_id: undefined
   };
 
-  constructor(
-    private animalService: AnimalService,
-    private propietarioService: PropietarioService,
-  ) {}
+  constructor(private animalService: AnimalService) {}
 
   ngOnInit(): void {
     this.loadAnimales();
-    this.loadPropietarios();
   }
-
-  // --- Carga de Datos ---
 
   loadAnimales(): void {
     this.loading = true;
+
     const pagination: PaginationParams = {
       page: this.currentPage,
       limit: this.pageSize
     };
 
-    // Tipado de respuesta para paginación
     this.animalService.getAnimales(pagination, this.filters).subscribe({
-      next: (response: ApiResponse<Animal[]>) => {
+      next: (response: PaginatedResponse<Animal>) => {
         this.animales = response.data;
-        // Asumimos que la respuesta incluye totalPages del backend
-         this.totalPages = Math.ceil(this.animales.length / this.pageSize);
+        this.totalPages = response.totalPages;
         this.loading = false;
       },
       error: (err: HttpErrorResponse | any) => {
@@ -72,24 +70,20 @@ export class AnimalListComponent implements OnInit {
     });
   }
 
-  loadPropietarios(): void {
-    this.propietarioService.getPropietarios().subscribe({
-      next: (data: Propietario[]) => (this.propietarios = data),
-      error: (err: HttpErrorResponse | any) => console.error('Error al cargar propietarios:', err)
-    });
-  }
-
-  // --- Paginación y Filtros ---
-
   onFilterChange(): void {
-    this.currentPage = 1;
+    this.currentPage = 1; // resetear página al cambiar filtro
     this.loadAnimales();
   }
 
   clearFilters(): void {
-    // Para filtros más complejos, es mejor restablecer cada propiedad o usar un objeto inicial
-    this.filters = {}; 
-    this.currentPage = 1;
+    this.filters = {
+      nombre_animal: '',
+      especie_animal: '',
+      propietario_id: '',
+      categoria_id: '',
+      fecha_desde: '',
+      fecha_hasta: ''
+    };
     this.loadAnimales();
   }
 
@@ -100,98 +94,55 @@ export class AnimalListComponent implements OnInit {
     }
   }
 
-  // --- CRUD (Crear, Editar, Eliminar) y Modal ---
-
   openCreateModal(): void {
     this.editingAnimal = null;
-    this.animalForm = { // Resetear a la estructura de CreateAnimalRequest
+    this.animalForm = {
       nombre_animal: '',
       especie_animal: '',
-      fecha_nacimiento_animal: '',
-      propietario_id: '',
-      categoria_id: ''
-    } as CreateAnimalRequest;
+      fecha_nacimiento_animal: undefined,
+      propietario_id: undefined,
+      categoria_id: undefined
+    };
     this.showModal = true;
   }
 
   editAnimal(animal: Animal): void {
     this.editingAnimal = animal;
-    // La fecha se extrae hasta el formato 'YYYY-MM-DD' para los inputs de tipo date
-    const fechaNacimiento = animal.fecha_nacimiento_animal?.split('T')[0] || ''; 
-    
-    this.animalForm = { // Cargar datos para edición (UpdateAnimalRequest)
-      nombre_animal: animal.nombre_animal,
-      especie_animal: animal.especie_animal,
-      fecha_nacimiento_animal: fechaNacimiento,
-      propietario_id: animal.propietario_id,
-      categoria_id: animal.categoria_id
-    } as UpdateAnimalRequest;
+    this.animalForm = { ...animal };
     this.showModal = true;
   }
 
   closeModal(): void {
     this.showModal = false;
-    this.editingAnimal = null;
   }
 
   saveAnimal(): void {
-    // Validación simple
-    if (
-      !this.animalForm.nombre_animal?.trim() ||
-      !this.animalForm.especie_animal?.trim() ||
-      !this.animalForm.fecha_nacimiento_animal ||
-      !this.animalForm.propietario_id ||
-      !this.animalForm.categoria_id
-    ) {
-      alert('Todos los campos son obligatorios.');
-      return;
-    }
-
-    const dataToSend = {
-      nombre_animal: this.animalForm.nombre_animal,
-      especie_animal: this.animalForm.especie_animal,
-      fecha_nacimiento_animal: this.animalForm.fecha_nacimiento_animal,
-      propietario_id: this.animalForm.propietario_id,
-      categoria_id: this.animalForm.categoria_id
-    };
+    const data: Partial<Animal> = { ...this.animalForm };
 
     if (this.editingAnimal) {
-      // Actualizar animal
-      this.animalService.updateAnimal(this.editingAnimal.id_animal, dataToSend as UpdateAnimalRequest).subscribe({
-        next: (animalActualizado: Animal) => { // Tipado de respuesta
+      this.animalService.updateAnimal(this.editingAnimal.id_animal, data).subscribe({
+        next: () => {
           this.loadAnimales();
           this.closeModal();
         },
-        error: (err: HttpErrorResponse | any) => { // Tipado de error
-          console.error('Error al actualizar animal:', err);
-          alert(`Error al actualizar el animal: ${err.error?.message || 'Error desconocido'}`);
-        }
+        error: (err: HttpErrorResponse | any) => console.error('Error al actualizar animal:', err)
       });
     } else {
-      // Crear nuevo animal
-      this.animalService.createAnimal(dataToSend as CreateAnimalRequest).subscribe({
-        next: (nuevoAnimal: Animal) => { // Tipado de respuesta
+      this.animalService.createAnimal(data).subscribe({
+        next: () => {
           this.loadAnimales();
           this.closeModal();
         },
-        error: (err: HttpErrorResponse | any) => { // Tipado de error
-          console.error('Error al crear animal:', err);
-          alert(`Error al crear el animal: ${err.error?.message || 'Error desconocido'}`);
-        }
+        error: (err: HttpErrorResponse | any) => console.error('Error al crear animal:', err)
       });
     }
   }
 
   deleteAnimal(animal: Animal): void {
-    if (confirm(`¿Está seguro de eliminar al animal "${animal.nombre_animal}"? Esta acción no se puede deshacer.`)) {
+    if (confirm(`¿Eliminar animal "${animal.nombre_animal}"?`)) {
       this.animalService.deleteAnimal(animal.id_animal).subscribe({
-        next: () => {
-          this.loadAnimales();
-        },
-        error: (err: HttpErrorResponse | any) => { // Tipado de error
-          console.error('Error al eliminar animal:', err);
-          alert(`Error al eliminar el animal: ${err.error?.message || 'Error desconocido'}`);
-        }
+        next: () => this.loadAnimales(),
+        error: (err: HttpErrorResponse | any) => console.error('Error al eliminar animal:', err)
       });
     }
   }

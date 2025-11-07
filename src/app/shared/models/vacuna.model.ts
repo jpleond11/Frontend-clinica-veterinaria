@@ -34,6 +34,7 @@ export interface UpdateVacunaRequest {
  */
 export interface VacunaFilters {
   nombre_vacuna?: string;
+  fecha_aplicacion_vacuna?: string;
   fecha_aplicacion_desde?: string;
   fecha_aplicacion_hasta?: string;
   proxima_dosis_desde?: string;

@@ -45,7 +45,11 @@ export interface UpdateVeterinarioRequest {
  * Modelo para filtros de veterinarios
  */
 export interface VeterinarioFilters {
-  nombre?: string; // Para buscar por nombre/apellido
+  id_veterinario?: string
+  primer_nombre_veterinario?: string;
+  segundo_nombre_veterinario?: string | null;
+  primer_apellido_veterinario?: string;
+  segundo_apellido_veterinario?: string | null;
   email?: string;
   especialidad?: string;
   telefono?: string;

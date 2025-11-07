@@ -9,8 +9,8 @@ import { Cita, CreateCitaRequest, UpdateCitaRequest } from '../../../shared/mode
 import { Animal } from '../../../shared/models/animal.model';
 import { Vacuna } from '../../../shared/models/vacuna.model';
 import { Veterinario } from '../../../shared/models/veterinario.model';
-import { PaginationParams, ApiResponse } from '../../../core/models/api-response.model'; // Asegúrate de tener PaginationParams y ApiResponse
-import { HttpErrorResponse } from '@angular/common/http'; // Importación necesaria para tipar errores
+import { PaginationParams, ApiResponse } from '../../../core/models/api-response.model';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-cita-list',
@@ -33,16 +33,14 @@ export class CitaListComponent implements OnInit {
   totalPages = 1;
   pageSize = 10;
 
-  // Si usas filtros de Citas, podrías importar CitaFilters aquí
-  filters = { motivo_cita: '' }; 
+  filters = { motivo_cita: '' };
 
-  // Es una buena práctica tipar el formulario si lo usas con CreateCitaRequest
   citaForm: CreateCitaRequest | UpdateCitaRequest = {
     fecha_inicio_cita: '',
     fecha_final_cita: '',
     motivo_cita: '',
     animal_id: '',
-    vacuna_id: undefined, // Usamos undefined en lugar de '' para campos opcionales si no se han rellenado
+    vacuna_id: undefined,
     veterinario_id: ''
   };
 
@@ -62,18 +60,11 @@ export class CitaListComponent implements OnInit {
 
   loadCitas(): void {
     this.loading = true;
-    
-    // Se utilizan PaginationParams para la llamada al servicio
-    const pagination: PaginationParams = {
-      page: this.currentPage,
-      limit: this.pageSize
-    };
-
-    // Se asume que getCitas soporta paginación y devuelve ApiResponse
+    const pagination: PaginationParams = { page: this.currentPage, limit: this.pageSize };
     this.citaService.getCitas(pagination, this.filters).subscribe({
       next: (response: ApiResponse<Cita[]>) => {
         this.citas = response.data;
-        this.totalPages = Math.ceil(this.citas.length / this.pageSize)
+        this.totalPages = Math.ceil(this.citas.length / this.pageSize);
         this.loading = false;
       },
       error: (err: HttpErrorResponse | any) => {
@@ -84,27 +75,40 @@ export class CitaListComponent implements OnInit {
   }
 
   loadAnimales(): void {
-    // Tipado: (data: Animal[])
-    this.animalService.getAnimales().subscribe({
-      next: (data: Animal[]) => (this.animales = data),
-      error: (err: HttpErrorResponse | any) => console.error('Error al cargar animales:', err)
+    const pagination = { page: 1, limit: 100 };
+    this.animalService.getAnimales(pagination).subscribe({
+      next: (response) => this.animales = response.data,
+      error: (err) => console.error('Error al cargar animales:', err)
     });
   }
 
   loadVacunas(): void {
-    // Tipado: (data: Vacuna[])
     this.vacunaService.getVacunas().subscribe({
-      next: (data: Vacuna[]) => (this.vacunas = data),
-      error: (err: HttpErrorResponse | any) => console.error('Error al cargar vacunas:', err)
+      next: (response) => this.vacunas = response.data,
+      error: (err) => console.error('Error al cargar vacunas:', err)
     });
   }
 
   loadVeterinarios(): void {
-    // Tipado: (data: Veterinario[])
-    this.veterinarioService.getVeterinarios().subscribe({
-      next: (data: Veterinario[]) => (this.veterinarios = data),
-      error: (err: HttpErrorResponse | any) => console.error('Error al cargar veterinarios:', err)
+    const pagination: PaginationParams = { page: 1, limit: 100 };
+    this.veterinarioService.getVeterinarios(pagination).subscribe({
+      next: (response) => this.veterinarios = response.data,
+      error: (err) => console.error('Error al cargar veterinarios:', err)
     });
+  }
+
+  // ⚠️ Cambiado para aceptar Partial<Veterinario> y manejar campos faltantes
+  getVeterinarioNombre(vet?: Partial<Veterinario>): string {
+    if (!vet) return '-';
+    return [
+      vet.primer_nombre_veterinario || '',
+      vet.segundo_nombre_veterinario || '',
+      vet.primer_apellido_veterinario || '',
+      vet.segundo_apellido_veterinario || ''
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .trim() || '-';
   }
 
   onFilterChange(): void {
@@ -136,7 +140,7 @@ export class CitaListComponent implements OnInit {
       fecha_final_cita: cita.fecha_final_cita?.slice(0, 16) || '',
       motivo_cita: cita.motivo_cita,
       animal_id: cita.animal_id,
-      vacuna_id: cita.vacuna_id || undefined, // Convertir a undefined si es nulo
+      vacuna_id: cita.vacuna_id || undefined,
       veterinario_id: cita.veterinario_id
     };
     this.showModal = true;
@@ -147,18 +151,16 @@ export class CitaListComponent implements OnInit {
   }
 
   saveCita(): void {
-    // Almacena solo las propiedades requeridas para la request, eliminando `vacuna_id` si es undefined
-    const data: CreateCitaRequest | UpdateCitaRequest = { 
+    const data: CreateCitaRequest | UpdateCitaRequest = {
       fecha_inicio_cita: this.citaForm.fecha_inicio_cita,
       fecha_final_cita: this.citaForm.fecha_final_cita,
       motivo_cita: this.citaForm.motivo_cita,
       animal_id: this.citaForm.animal_id,
-      vacuna_id: this.citaForm.vacuna_id || undefined, // Asegura que solo se envíe si tiene valor
+      vacuna_id: this.citaForm.vacuna_id || undefined,
       veterinario_id: this.citaForm.veterinario_id
     };
 
     if (this.editingCita) {
-      // Filtrar campos undefined para la actualización (si el backend lo requiere)
       const updateData: UpdateCitaRequest = Object.keys(data).reduce((acc, key) => {
         const value = data[key as keyof typeof data];
         if (value !== undefined && value !== null && value !== '') {
@@ -166,22 +168,14 @@ export class CitaListComponent implements OnInit {
         }
         return acc;
       }, {});
-
       this.citaService.updateCita(this.editingCita.id_cita, updateData).subscribe({
-        next: (citaActualizada: Cita) => { // Tipado de respuesta
-          this.loadCitas();
-          this.closeModal();
-        },
-        error: (err: HttpErrorResponse | any) => console.error('Error al actualizar cita:', err) // Tipado de error
+        next: () => { this.loadCitas(); this.closeModal(); },
+        error: (err: HttpErrorResponse | any) => console.error('Error al actualizar cita:', err)
       });
     } else {
-      const createData = data as CreateCitaRequest;
-      this.citaService.createCita(createData).subscribe({
-        next: (nuevaCita: Cita) => { // Tipado de respuesta
-          this.loadCitas();
-          this.closeModal();
-        },
-        error: (err: HttpErrorResponse | any) => console.error('Error al crear cita:', err) // Tipado de error
+      this.citaService.createCita(data as CreateCitaRequest).subscribe({
+        next: () => { this.loadCitas(); this.closeModal(); },
+        error: (err: HttpErrorResponse | any) => console.error('Error al crear cita:', err)
       });
     }
   }
@@ -190,14 +184,12 @@ export class CitaListComponent implements OnInit {
     if (confirm(`¿Eliminar cita "${cita.motivo_cita}"?`)) {
       this.citaService.deleteCita(cita.id_cita).subscribe({
         next: () => this.loadCitas(),
-        error: (err: HttpErrorResponse | any) => console.error('Error al eliminar cita:', err) // Tipado de error
+        error: (err: HttpErrorResponse | any) => console.error('Error al eliminar cita:', err)
       });
     }
   }
 
   goToPage(page: number): void {
-    if (page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
-    }
+    if (page >= 1 && page <= this.totalPages) this.currentPage = page;
   }
 }
