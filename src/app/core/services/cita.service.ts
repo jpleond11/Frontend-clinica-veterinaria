@@ -33,14 +33,6 @@ export class CitaService {
       .set('skip', ((pagination.page - 1) * pagination.limit).toString())
       .set('limit', pagination.limit.toString());
 
-    if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== null && value !== undefined && value !== '') {
-          params = params.set(key, value.toString());
-        }
-      });
-    }
-
     // FastAPI devuelve una lista simple, así que la adaptamos a ApiResponse
     return this.http.get<Cita[]>(this.baseUrl, { params }).pipe(
       map((citas) => ({

@@ -2,13 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CitaService } from '../../../core/services/cita.service';
-import { AnimalService } from '../../../core/services/animal.service';
-import { VacunaService } from '../../../core/services/vacuna.service';
-import { VeterinarioService } from '../../../core/services/veterinario.service';
 import { Cita, CreateCitaRequest, UpdateCitaRequest } from '../../../shared/models/cita.model';
-import { Animal } from '../../../shared/models/animal.model';
-import { Vacuna } from '../../../shared/models/vacuna.model';
-import { Veterinario } from '../../../shared/models/veterinario.model';
 import { PaginationParams, ApiResponse } from '../../../core/models/api-response.model';
 import { HttpErrorResponse } from '@angular/common/http';
 
@@ -21,9 +15,6 @@ import { HttpErrorResponse } from '@angular/common/http';
 })
 export class CitaListComponent implements OnInit {
   citas: Cita[] = [];
-  animales: Animal[] = [];
-  vacunas: Vacuna[] = [];
-  veterinarios: Veterinario[] = [];
 
   showModal = false;
   editingCita: Cita | null = null;
@@ -33,7 +24,7 @@ export class CitaListComponent implements OnInit {
   totalPages = 1;
   pageSize = 10;
 
-  filters = { motivo_cita: '' };
+  filtroId = '';
 
   citaForm: CreateCitaRequest | UpdateCitaRequest = {
     fecha_inicio_cita: '',
@@ -46,22 +37,16 @@ export class CitaListComponent implements OnInit {
 
   constructor(
     private citaService: CitaService,
-    private animalService: AnimalService,
-    private vacunaService: VacunaService,
-    private veterinarioService: VeterinarioService
   ) {}
 
   ngOnInit(): void {
     this.loadCitas();
-    this.loadAnimales();
-    this.loadVacunas();
-    this.loadVeterinarios();
   }
 
   loadCitas(): void {
     this.loading = true;
     const pagination: PaginationParams = { page: this.currentPage, limit: this.pageSize };
-    this.citaService.getCitas(pagination, this.filters).subscribe({
+    this.citaService.getCitas(pagination).subscribe({
       next: (response: ApiResponse<Cita[]>) => {
         this.citas = response.data;
         this.totalPages = Math.ceil(this.citas.length / this.pageSize);
@@ -74,49 +59,33 @@ export class CitaListComponent implements OnInit {
     });
   }
 
-  loadAnimales(): void {
-    const pagination = { page: 1, limit: 100 };
-    this.animalService.getAnimales(pagination).subscribe({
-      next: (response) => this.animales = response.data,
-      error: (err) => console.error('Error al cargar animales:', err)
-    });
-  }
-
-  loadVacunas(): void {
-    this.vacunaService.getVacunas().subscribe({
-      next: (response) => this.vacunas = response.data,
-      error: (err) => console.error('Error al cargar vacunas:', err)
-    });
-  }
-
-  loadVeterinarios(): void {
-    const pagination: PaginationParams = { page: 1, limit: 100 };
-    this.veterinarioService.getVeterinarios(pagination).subscribe({
-      next: (response) => this.veterinarios = response.data,
-      error: (err) => console.error('Error al cargar veterinarios:', err)
-    });
-  }
-
-  // ⚠️ Cambiado para aceptar Partial<Veterinario> y manejar campos faltantes
-  getVeterinarioNombre(vet?: Partial<Veterinario>): string {
-    if (!vet) return '-';
-    return [
-      vet.primer_nombre_veterinario || '',
-      vet.segundo_nombre_veterinario || '',
-      vet.primer_apellido_veterinario || '',
-      vet.segundo_apellido_veterinario || ''
-    ]
-      .filter(Boolean)
-      .join(' ')
-      .trim() || '-';
-  }
+  buscarPorId(): void {
+      const id = this.filtroId.trim();
+      if (!id) {
+        this.loadCitas();
+        return;
+      }
+  
+      this.loading = true;
+      this.citaService.getCitaById(id).subscribe({
+        next: (cita: Cita) => {
+          this.citas = [cita]; // mostrar solo el encontrado
+          this.totalPages = 1;
+          this.loading = false;
+        },
+        error: (err: HttpErrorResponse | any) => {
+          console.error('Error al buscar animal:', err);
+          this.citas = [];
+          this.loading = false;
+        }
+      });
+    }
 
   onFilterChange(): void {
     this.loadCitas();
   }
 
   clearFilters(): void {
-    this.filters.motivo_cita = '';
     this.loadCitas();
   }
 

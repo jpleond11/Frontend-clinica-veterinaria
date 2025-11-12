@@ -1,5 +1,6 @@
 <div class="cita-list-container">
   <div class="card">
+    <!-- 🔹 Encabezado -->
     <div class="card-header d-flex justify-content-between align-items-center">
       <h2 class="card-title">Gestión de Citas</h2>
       <button class="btn btn-primary" (click)="openCreateModal()">
@@ -8,16 +9,16 @@
     </div>
 
     <div class="card-body">
-      <!-- Filtros -->
+      <!-- 🔍 Filtro por ID de cita -->
       <div class="filters mb-3">
         <div class="row">
-          <div class="col-md-4">
+          <div class="col-md-6">
             <input
               type="text"
               class="form-control"
-              placeholder="Buscar por motivo..."
-              [(ngModel)]="filters.motivo_cita"
-              (input)="onFilterChange()"
+              placeholder="Buscar por ID de cita (UUID)"
+              [(ngModel)]="filtroId"
+              (input)="buscarPorId()"
             />
           </div>
 
@@ -29,7 +30,7 @@
         </div>
       </div>
 
-      <!-- Tabla de citas -->
+      <!-- 📋 Tabla -->
       <div class="table-responsive">
         <table class="table">
           <thead>
@@ -38,34 +39,49 @@
               <th>Fecha Inicio</th>
               <th>Fecha Final</th>
               <th>Motivo</th>
-              <th>Animal</th>
-              <th>Vacuna</th>
-              <th>Veterinario</th>
+              <th>Animal ID</th>
+              <th>Vacuna ID</th>
+              <th>Veterinario ID</th>
               <th>Acciones</th>
             </tr>
           </thead>
+
           <tbody>
+            <!-- Estado de carga -->
             <tr *ngIf="loading">
               <td colspan="8" class="text-center">Cargando...</td>
             </tr>
 
+            <!-- Sin datos -->
             <tr *ngIf="!loading && citas.length === 0">
               <td colspan="8" class="text-center">No hay citas registradas</td>
             </tr>
 
-            <tr *ngFor="let cita of citas | slice:(currentPage-1)*pageSize:(currentPage)*pageSize">
+            <!-- Datos -->
+            <tr
+              *ngFor="
+                let cita of citas
+                  | slice: (currentPage - 1) * pageSize : currentPage * pageSize
+              "
+            >
               <td>{{ cita.id_cita }}</td>
-              <td>{{ cita.fecha_inicio_cita | date:'short' }}</td>
-              <td>{{ cita.fecha_final_cita | date:'short' }}</td>
+              <td>{{ cita.fecha_inicio_cita | date: 'yyyy-MM-dd HH:mm' }}</td>
+              <td>{{ cita.fecha_final_cita | date: 'yyyy-MM-dd HH:mm' }}</td>
               <td>{{ cita.motivo_cita }}</td>
-              <td>{{ cita.animal?.nombre_animal || '-' }}</td>
-              <td>{{ cita.vacuna?.nombre_vacuna || '-' }}</td>
-              <td>{{ getVeterinarioNombre(cita.veterinario) }}</td>
+              <td>{{ cita.animal_id }}</td>
+              <td>{{ cita.vacuna_id || '-' }}</td>
+              <td>{{ cita.veterinario_id }}</td>
               <td>
-                <button class="btn btn-sm btn-primary" (click)="editCita(cita)">
+                <button
+                  class="btn btn-sm btn-primary"
+                  (click)="editCita(cita)"
+                >
                   Editar
                 </button>
-                <button class="btn btn-sm btn-danger" (click)="deleteCita(cita)">
+                <button
+                  class="btn btn-sm btn-danger"
+                  (click)="deleteCita(cita)"
+                >
                   Eliminar
                 </button>
               </td>
@@ -74,7 +90,7 @@
         </table>
       </div>
 
-      <!-- Paginación -->
+      <!-- 📄 Paginación -->
       <div class="pagination mt-3" *ngIf="totalPages > 1">
         <button
           class="btn btn-secondary"
@@ -95,7 +111,7 @@
     </div>
   </div>
 
-  <!-- Modal para crear/editar cita -->
+  <!-- 🪟 Modal para crear/editar cita -->
   <div
     class="modal fade"
     [class.show]="showModal"
@@ -105,6 +121,7 @@
   >
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
+        <!-- Header -->
         <div class="modal-header">
           <h5 class="modal-title">
             {{ editingCita ? 'Editar Cita' : 'Registrar Nueva Cita' }}
@@ -114,6 +131,7 @@
           </button>
         </div>
 
+        <!-- Body -->
         <div class="modal-body">
           <form (ngSubmit)="saveCita()">
             <div class="row">
@@ -155,67 +173,48 @@
                 [(ngModel)]="citaForm.motivo_cita"
                 name="motivo_cita"
                 required
-                placeholder="Ejemplo: Vacunación, Control general..."
+                placeholder="Ejemplo: Vacunación, Consulta..."
               />
             </div>
 
-            <div class="row">
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label for="animal_id">Animal *</label>
-                  <select
-                    class="form-control"
-                    id="animal_id"
-                    [(ngModel)]="citaForm.animal_id"
-                    name="animal_id"
-                    required
-                  >
-                    <option value="">Seleccione un animal</option>
-                    <option *ngFor="let animal of animales" [value]="animal.id_animal">
-                      {{ animal.nombre_animal }}
-                    </option>
-                  </select>
-                </div>
-              </div>
+            <div class="form-group">
+              <label for="animal_id">Animal ID *</label>
+              <input
+                type="text"
+                class="form-control"
+                id="animal_id"
+                [(ngModel)]="citaForm.animal_id"
+                name="animal_id"
+                required
+              />
+            </div>
 
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label for="vacuna_id">Vacuna</label>
-                  <select
-                    class="form-control"
-                    id="vacuna_id"
-                    [(ngModel)]="citaForm.vacuna_id"
-                    name="vacuna_id"
-                  >
-                    <option value="">Sin vacuna</option>
-                    <option *ngFor="let vacuna of vacunas" [value]="vacuna.id_vacuna">
-                      {{ vacuna.nombre_vacuna }}
-                    </option>
-                  </select>
-                </div>
-              </div>
+            <div class="form-group">
+              <label for="vacuna_id">Vacuna ID</label>
+              <input
+                type="text"
+                class="form-control"
+                id="vacuna_id"
+                [(ngModel)]="citaForm.vacuna_id"
+                name="vacuna_id"
+              />
+            </div>
 
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label for="veterinario_id">Veterinario *</label>
-                  <select
-                    class="form-control"
-                    id="veterinario_id"
-                    [(ngModel)]="citaForm.veterinario_id"
-                    name="veterinario_id"
-                    required
-                  >
-                    <option value="">Seleccione un veterinario</option>
-                    <option *ngFor="let vet of veterinarios" [value]="vet.id_veterinario">
-                      {{ getVeterinarioNombre(vet) }}
-                    </option>
-                  </select>
-                </div>
-              </div>
+            <div class="form-group">
+              <label for="veterinario_id">Veterinario ID *</label>
+              <input
+                type="text"
+                class="form-control"
+                id="veterinario_id"
+                [(ngModel)]="citaForm.veterinario_id"
+                name="veterinario_id"
+                required
+              />
             </div>
           </form>
         </div>
 
+        <!-- Footer -->
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" (click)="closeModal()">
             Cancelar

@@ -47,7 +47,7 @@ export class VacunaListComponent implements OnInit {
     this.vacunaService.getVacunas(pagination, this.filters).subscribe({
       next: (response) => {
         this.vacunas = response.data;
-        this.totalPages = response.totalPages || 1;
+        this.totalPages = Math.ceil(response.data.length / this.pageSize);
         this.loading = false;
       },
       error: (error) => {

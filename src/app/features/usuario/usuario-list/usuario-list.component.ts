@@ -38,22 +38,7 @@ export class UsuarioListComponent implements OnInit {
   constructor(private usuarioService: UsuarioService) {}
 
   ngOnInit(): void {
-    // Datos dummy de ejemplo
-    this.usuarios = [
-      {
-        id_usuario: '11111111-1111-1111-1111-111111111111',
-        primer_nombre_usuario: 'Juan',
-        segundo_nombre_usuario: 'Carlos',
-        primer_apellido_usuario: 'Pérez',
-        segundo_apellido_usuario: 'Gómez',
-        rol_usuario: 'Administrador',
-        fecha_nacimiento_usuario: '1990-05-20',
-        nombre_usuario: 'jcarlos',
-        password: '******'
-      }
-    ];
-    this.totalPages = 1;
-    // this.loadUsuarios();
+    this.loadUsuarios();
   }
 
   loadUsuarios(): void {

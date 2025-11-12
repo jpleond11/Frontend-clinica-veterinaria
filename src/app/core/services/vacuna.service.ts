@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import {
   ApiResponse,
-  PaginatedResponse,
   PaginationParams
 } from '../models/api-response.model';
 import {
@@ -17,68 +17,75 @@ import {
   providedIn: 'root'
 })
 export class VacunaService {
-  private readonly apiUrl = 'http://localhost:8000/vacunas';
+  private baseUrl = `${environment.apiUrl}/vacunas`;
+
   constructor(private http: HttpClient) {}
 
   /**
-   * Obtener todas las vacunas con paginación y filtros opcionales
+   * Obtener todas las vacunas (con paginación y filtros opcionales)
    */
   getVacunas(
-    pagination?: PaginationParams,
+    pagination: PaginationParams,
     filters?: VacunaFilters
-  ): Observable<PaginatedResponse<Vacuna>> {
-    let params = new HttpParams();
+  ): Observable<ApiResponse<Vacuna[]>> {
+    let params = new HttpParams()
+      .set('skip', ((pagination.page - 1) * pagination.limit).toString())
+      .set('limit', pagination.limit.toString());
 
-    if (pagination) {
-      params = params
-        .set('skip', ((pagination.page - 1) * pagination.limit).toString())
-        .set('limit', pagination.limit.toString());
-    }
-
-    // Agregar filtros si existen
+    // Aplicar filtros opcionales si existen
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
-          params = params.set(key, value);
+        if (value !== null && value !== undefined && value !== '') {
+          params = params.set(key, value.toString());
         }
       });
     }
 
-    return this.http.get<PaginatedResponse<Vacuna>>(this.apiUrl, { params });
+    // Si la API devuelve una lista simple, la adaptamos a ApiResponse
+    return this.http.get<Vacuna[]>(this.baseUrl, { params }).pipe(
+      map((vacunas) => ({
+        data: vacunas,
+        message: 'Vacunas obtenidas correctamente',
+        success: true,
+        status: 200
+      }))
+    );
   }
 
   /**
-   * Obtener una vacuna por ID
+   * Obtener una vacuna por su ID
    */
-  getVacunaById(id_vacuna: string): Observable<ApiResponse<Vacuna>> {
-    return this.http.get<ApiResponse<Vacuna>>(`${this.apiUrl}/${id_vacuna}`);
+  getVacunaById(id: string): Observable<Vacuna> {
+    return this.http.get<Vacuna>(`${this.baseUrl}/${id}`);
   }
 
   /**
    * Crear una nueva vacuna
    */
-  createVacuna(vacuna: CreateVacunaRequest): Observable<ApiResponse<Vacuna>> {
-    // Aquí podrías agregar usuario_id_creacion si lo manejas desde el frontend
-    return this.http.post<ApiResponse<Vacuna>>(this.apiUrl, vacuna);
+  createVacuna(vacuna: CreateVacunaRequest): Observable<Vacuna> {
+    return this.http.post<Vacuna>(this.baseUrl, vacuna);
   }
 
   /**
    * Actualizar una vacuna existente
    */
-  updateVacuna(
-    id_vacuna: string,
-    vacuna: UpdateVacunaRequest
-  ): Observable<ApiResponse<Vacuna>> {
-    return this.http.put<ApiResponse<Vacuna>>(
-      `${this.apiUrl}/${id_vacuna}`,
-      vacuna
-    );
+  updateVacuna(id: string, vacuna: UpdateVacunaRequest): Observable<Vacuna> {
+    return this.http.put<Vacuna>(`${this.baseUrl}/${id}`, vacuna);
   }
 
   /**
-   * Eliminar una vacuna
+   * Eliminar una vacuna por su ID
    */
-  deleteVacuna(id_vacuna: string): Observable<ApiResponse<void>> {
-    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/${id_vacuna}`);
+  deleteVacuna(id: string): Observable<ApiResponse<null>> {
+    return this.http
+      .delete<{ mensaje: string; exito: boolean }>(`${this.baseUrl}/${id}`)
+      .pipe(
+        map((res) => ({
+          data: null,
+          message: res.mensaje || 'Vacuna eliminada exitosamente',
+          success: res.exito,
+          status: 200
+        }))
+      );
   }
 }
