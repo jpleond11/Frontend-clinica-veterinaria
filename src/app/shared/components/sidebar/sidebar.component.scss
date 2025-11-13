@@ -1,4 +1,4 @@
-// Sidebar styles based on the frontend example
+/* --- Sidebar general styles --- */
 .sidebar {
   position: fixed;
   top: 0;
@@ -6,21 +6,21 @@
   left: 0;
   z-index: 1000;
   width: 260px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #2ecc71 0%, #1abc9c 50%, #3498db 100%) !important;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
-}
-
-.sidebar[data-color="red"] {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
 }
 
 .logo {
-  padding: 15px 0;
+  padding: 25px 0 20px;
   margin: 0;
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   position: relative;
   z-index: 4;
+  text-align: center;
 }
 
 .logo:after {
@@ -34,26 +34,22 @@
 }
 
 .logo-img {
-  width: 30px;
-  height: 30px;
-  display: inline-block;
-  margin-left: 10px;
-  margin-right: 15px;
-  border-radius: 30px;
-  text-align: center;
-  overflow: hidden;
-  vertical-align: middle;
-  background: rgba(255, 255, 255, 0.2);
+  width: 45px;
+  height: 45px;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 3px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .logo-text {
   color: white;
   font-weight: bold;
-  font-size: 12px;
+  font-size: 14px;
   text-align: center;
+  letter-spacing: 1px;
 }
 
 .simple-text {
@@ -65,7 +61,6 @@
   text-decoration: none;
   font-weight: 400;
   line-height: 30px;
-  overflow: hidden;
 }
 
 .logo-mini {
@@ -83,17 +78,18 @@
   padding: 11px 0 8px;
   text-transform: uppercase;
   font-weight: 600;
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: 1px;
 }
 
+/* --- Sidebar menu --- */
 .sidebar-wrapper {
   position: relative;
   height: calc(100vh - 75px);
-  overflow: auto;
+  overflow-y: auto;
   width: 260px;
   z-index: 4;
-  padding-bottom: 30px;
+  padding-bottom: 90px; /* espacio para user-info */
 }
 
 .nav {
@@ -107,86 +103,57 @@
 }
 
 .nav li > a {
-  color: #fff;
-  display: block;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
   text-decoration: none;
-  position: relative;
-  text-transform: uppercase;
-  cursor: pointer;
-  font-size: 12px;
-  padding: 10px 8px;
-  line-height: 30px;
-  opacity: 0.8;
+  font-size: 13px;
+  padding: 10px 16px;
+  line-height: 24px;
+  opacity: 0.9;
   transition: all 0.3s ease;
+  border-left: 3px solid transparent;
 }
 
 .nav li > a:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
+  border-left: 3px solid #ffffff;
   opacity: 1;
-  color: #fff;
 }
 
 .nav li > a.active {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.25);
+  border-left: 3px solid #ffffff;
   opacity: 1;
-  color: #fff;
 }
 
-.nav li > a i {
-  font-size: 20px;
-  float: left;
-  margin-right: 12px;
-  line-height: 30px;
-  width: 34px;
+.nav li > a i.material-icons {
+  font-size: 22px;
+  margin-right: 14px;
+  width: 24px;
   text-align: center;
 }
 
 .nav li > a p {
   margin: 0;
-  line-height: 30px;
+  line-height: 24px;
   font-size: 14px;
-  position: relative;
-  display: block;
-  height: auto;
   white-space: nowrap;
-  transition: 0.3s ease;
 }
 
-// Responsive
-@media (max-width: 991px) {
-  .sidebar {
-    position: fixed;
-    display: block;
-    top: 0;
-    height: 100%;
-    width: 260px;
-    right: auto;
-    left: 0;
-    z-index: 1032;
-    visibility: visible;
-    overflow-y: visible;
-    padding: 0;
-    transform: translate3d(-260px, 0, 0);
-    transition: all 0.33s cubic-bezier(0.685, 0.0473, 0.346, 1);
-  }
-  
-  .sidebar.show {
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-// User info section
+/* --- User info (fixed bottom section) --- */
 .user-info {
-  position: absolute;
+  position: fixed;
   bottom: 0;
   left: 0;
-  right: 0;
-  padding: 15px;
-  background: rgba(0, 0, 0, 0.1);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  width: 260px;
+  background: linear-gradient(135deg, #16a085 0%, #2980b9 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 12px 15px;
+  z-index: 1100;
 }
 
 .user-details {
@@ -220,7 +187,7 @@
 
 .user-name {
   color: white;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
@@ -229,21 +196,18 @@
 }
 
 .user-role {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 10px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .logout-btn {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
   border: none;
   color: white;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -254,23 +218,21 @@
 }
 
 .logout-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.05);
 }
 
 .logout-btn i {
-  font-size: 14px;
+  font-size: 16px;
 }
 
-// Icons styles (you might need to include the now-ui-icons font)
-.now-ui-icons {
-  font-family: 'Nucleo Outline';
-  speak: none;
-  font-style: normal;
-  font-weight: normal;
-  font-variant: normal;
-  text-transform: none;
-  line-height: 1;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* --- Responsive --- */
+@media (max-width: 991px) {
+  .sidebar {
+    transform: translateX(-260px);
+    transition: transform 0.3s ease;
+  }
+  .sidebar.show {
+    transform: translateX(0);
+  }
 }

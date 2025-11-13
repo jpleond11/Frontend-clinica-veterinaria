@@ -9,7 +9,7 @@ import { SidebarComponent } from './shared/components/sidebar/sidebar.component'
   imports: [CommonModule, RouterOutlet, RouterModule, SidebarComponent],
   template: `
     <div class="wrapper">
-      <div class="sidebar" data-color="red">
+      <div class="sidebar">
         <app-sidebar></app-sidebar>
       </div>
       <div class="main-panel">
@@ -20,11 +20,13 @@ import { SidebarComponent } from './shared/components/sidebar/sidebar.component'
     </div>
   `,
   styles: [`
+    /* Layout base */
     .wrapper {
       display: flex;
       min-height: 100vh;
     }
 
+    /* Sidebar principal */
     .sidebar {
       position: fixed;
       top: 0;
@@ -32,36 +34,36 @@ import { SidebarComponent } from './shared/components/sidebar/sidebar.component'
       left: 0;
       z-index: 1000;
       width: 260px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      background: linear-gradient(135deg, #2ecc71 0%, #1abc9c 50%, #3498db 100%) !important;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.1);
       transition: all 0.3s ease;
+      color: white;
     }
 
-    .sidebar[data-color="red"] {
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    }
-
+    /* Panel de contenido */
     .main-panel {
       flex: 1;
       margin-left: 260px;
       background: #f8f9fa;
       min-height: 100vh;
+      transition: margin-left 0.3s ease;
     }
 
     .content {
-      padding: 0;
+      padding: 20px;
     }
 
+    /* Responsive */
     @media (max-width: 991px) {
       .sidebar {
         transform: translate3d(-260px, 0, 0);
         transition: all 0.33s cubic-bezier(0.685, 0.0473, 0.346, 1);
       }
-      
+
       .sidebar.show {
         transform: translate3d(0, 0, 0);
       }
-      
+
       .main-panel {
         margin-left: 0;
       }

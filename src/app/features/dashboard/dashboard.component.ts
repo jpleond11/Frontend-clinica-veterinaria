@@ -12,68 +12,30 @@ import { RouterModule } from '@angular/router';
       <div class="welcome-section">
         <div class="card glass">
           <div class="card-body text-center">
-            <div class="welcome-icon"></div>
-            <h1 class="welcome-title text-title-contrast">¡Bienvenido al Sistema!</h1>
-            <p class="welcome-subtitle text-high-contrast">Sistema de gestión con arquitectura limpia y diseño moderno</p>
+            <div class="welcome-icon">🐾</div>
+            <h1 class="welcome-title text-title-contrast">¡Bienvenido al Sistema Veterinario!</h1>
+            <p class="welcome-subtitle text-high-contrast">
+              Plataforma integral para la gestión de animales, citas, facturas y más.
+            </p>
           </div>
         </div>
       </div>
 
       <!-- Modules Grid -->
       <div class="modules-grid">
-        <div class="module-card slide-in-up" style="animation-delay: 0.1s">
+        <div class="module-card slide-in-up" *ngFor="let modulo of modulos; let i = index" [style.animation-delay]="(i + 1) * 0.1 + 's'">
           <div class="card">
             <div class="card-body text-center">
-              <div class="module-icon">📁</div>
-              <h3 class="module-title">Categorías</h3>
-              <p class="module-description">Gestiona las categorías de productos de manera eficiente</p>
+              <div class="module-icon">{{ modulo.icono }}</div>
+              <h3 class="module-title">{{ modulo.titulo }}</h3>
+              <p class="module-description">{{ modulo.descripcion }}</p>
               <div class="module-features">
-                <span class="feature-tag">CRUD</span>
-                <span class="feature-tag">Validación</span>
-                <span class="feature-tag">API</span>
+                <span class="feature-tag" *ngFor="let f of modulo.caracteristicas">{{ f }}</span>
               </div>
-              <a routerLink="/categorias" class="btn btn-primary btn-lg">
-                <span class="btn-icon">🚀</span>
-                Ver Categorías
+              <a [routerLink]="modulo.ruta" class="btn btn-primary btn-lg">
+                <span class="btn-icon">{{ modulo.iconoBoton }}</span>
+                {{ modulo.textoBoton }}
               </a>
-            </div>
-          </div>
-        </div>
-
-        <div class="module-card slide-in-up" style="animation-delay: 0.2s">
-          <div class="card">
-            <div class="card-body text-center">
-              <div class="module-icon">👥</div>
-              <h3 class="module-title">Usuarios</h3>
-              <p class="module-description">Administra los usuarios del sistema con seguridad</p>
-              <div class="module-features">
-                <span class="feature-tag">Autenticación</span>
-                <span class="feature-tag">Roles</span>
-                <span class="feature-tag">Seguridad</span>
-              </div>
-              <a routerLink="/usuarios" class="btn btn-primary btn-lg">
-                <span class="btn-icon">👤</span>
-                Ver Usuarios
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <div class="module-card slide-in-up" style="animation-delay: 0.3s">
-          <div class="card">
-            <div class="card-body text-center">
-              <div class="module-icon">📊</div>
-              <h3 class="module-title">Analytics</h3>
-              <p class="module-description">Visualiza estadísticas y métricas del sistema</p>
-              <div class="module-features">
-                <span class="feature-tag">Gráficos</span>
-                <span class="feature-tag">Reportes</span>
-                <span class="feature-tag">Dashboard</span>
-              </div>
-              <button class="btn btn-outline btn-lg" disabled>
-                <span class="btn-icon">📈</span>
-                Próximamente
-              </button>
             </div>
           </div>
         </div>
@@ -87,21 +49,9 @@ import { RouterModule } from '@angular/router';
           </div>
           <div class="card-body">
             <div class="actions-grid">
-              <button class="action-btn">
-                <span class="action-icon">➕</span>
-                <span class="action-text">Nueva Categoría</span>
-              </button>
-              <button class="action-btn">
-                <span class="action-icon">👤</span>
-                <span class="action-text">Nuevo Usuario</span>
-              </button>
-              <button class="action-btn">
-                <span class="action-icon">📊</span>
-                <span class="action-text">Ver Reportes</span>
-              </button>
-              <button class="action-btn">
-                <span class="action-icon">⚙️</span>
-                <span class="action-text">Configuración</span>
+              <button class="action-btn" *ngFor="let accion of accionesRapidas">
+                <span class="action-icon">{{ accion.icono }}</span>
+                <span class="action-text">{{ accion.texto }}</span>
               </button>
             </div>
           </div>
@@ -137,7 +87,6 @@ import { RouterModule } from '@angular/router';
       font-weight: 500;
       text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
     }
-
 
     .modules-grid {
       display: grid;
@@ -235,64 +184,99 @@ import { RouterModule } from '@angular/router';
     }
 
     @keyframes bounce {
-      0%, 20%, 50%, 80%, 100% {
-        transform: translateY(0);
-      }
-      40% {
-        transform: translateY(-10px);
-      }
-      60% {
-        transform: translateY(-5px);
-      }
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-10px); }
+      60% { transform: translateY(-5px); }
     }
 
     @media (max-width: 768px) {
-      .welcome-title {
-        font-size: 2rem;
-      }
-
-      .stats-row {
-        gap: 1rem;
-      }
-
-      .stat-number {
-        font-size: 1.5rem;
-      }
-
-      .modules-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-      }
-
-      .actions-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
+      .welcome-title { font-size: 2rem; }
+      .modules-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+      .actions-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
     @media (max-width: 480px) {
-      .dashboard {
-        padding: 1rem 0;
-      }
-
-      .welcome-title {
-        font-size: 1.75rem;
-      }
-
-      .stats-row {
-        flex-direction: column;
-        gap: 0.5rem;
-      }
-
-      .actions-grid {
-        grid-template-columns: 1fr;
-      }
+      .dashboard { padding: 1rem 0; }
+      .welcome-title { font-size: 1.75rem; }
+      .actions-grid { grid-template-columns: 1fr; }
     }
   `]
 })
 export class DashboardComponent implements OnInit {
-  constructor() { }
+  modulos = [
+    {
+      titulo: 'Animales',
+      descripcion: 'Gestiona los animales registrados en el sistema.',
+      icono: '🐶',
+      iconoBoton: '➡️',
+      textoBoton: 'Ver Animales',
+      ruta: '/animales',
+      caracteristicas: ['CRUD', 'Validaciones', 'Propietarios']
+    },
+    {
+      titulo: 'Citas',
+      descripcion: 'Administra las citas médicas de los animales.',
+      icono: '📅',
+      iconoBoton: '📋',
+      textoBoton: 'Ver Citas',
+      ruta: '/citas',
+      caracteristicas: ['Fechas', 'Veterinarios', 'Facturación']
+    },
+    {
+      titulo: 'Facturas',
+      descripcion: 'Consulta y gestiona las facturas generadas.',
+      icono: '💰',
+      iconoBoton: '🧾',
+      textoBoton: 'Ver Facturas',
+      ruta: '/facturas',
+      caracteristicas: ['Montos', 'Reportes', 'PDF']
+    },
+    {
+      titulo: 'Propietarios',
+      descripcion: 'Registra y administra los propietarios de los animales.',
+      icono: '👩‍🌾',
+      iconoBoton: '👁️',
+      textoBoton: 'Ver Propietarios',
+      ruta: '/propietarios',
+      caracteristicas: ['Contactos', 'Historial', 'Asociaciones']
+    },
+    {
+      titulo: 'Usuarios',
+      descripcion: 'Administra los usuarios del sistema con control de roles.',
+      icono: '👥',
+      iconoBoton: '🔐',
+      textoBoton: 'Ver Usuarios',
+      ruta: '/usuarios',
+      caracteristicas: ['Roles', 'Autenticación', 'Seguridad']
+    },
+    {
+      titulo: 'Vacunas',
+      descripcion: 'Gestiona las vacunas disponibles para los animales.',
+      icono: '💉',
+      iconoBoton: '📦',
+      textoBoton: 'Ver Vacunas',
+      ruta: '/vacunas',
+      caracteristicas: ['Lotes', 'Vencimientos', 'Control']
+    },
+    {
+      titulo: 'Veterinarios',
+      descripcion: 'Control y registro de los profesionales veterinarios.',
+      icono: '🩺',
+      iconoBoton: '👨‍⚕️',
+      textoBoton: 'Ver Veterinarios',
+      ruta: '/veterinarios',
+      caracteristicas: ['Especialidades', 'Citas', 'Agenda']
+    }
+  ];
+
+  accionesRapidas = [
+    { icono: '➕', texto: 'Nuevo Animal' },
+    { icono: '📅', texto: 'Programar Cita' },
+    { icono: '💰', texto: 'Generar Factura' },
+    { icono: '💉', texto: 'Registrar Vacuna' }
+  ];
 
   ngOnInit(): void {
-    // Aquí se pueden cargar estadísticas del dashboard
+    console.log('Dashboard cargado');
   }
 }
