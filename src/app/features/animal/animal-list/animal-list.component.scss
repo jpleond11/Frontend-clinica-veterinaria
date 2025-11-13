@@ -1,53 +1,53 @@
 // Paleta de colores veterinaria
-$primary-color: #2e8b57;
-$secondary-color: #4da6ff;
-$accent-color: #81c784;
+$primary-color: #2e8b57; // Verde principal
+$secondary-color: #4da6ff; // Azul claro
+$accent-color: #81c784; // Verde suave
 $danger-color: #e57373;
 $warning-color: #ffb74d;
 $light-bg: #f8f9fa;
 
 // Contenedor principal
-.usuario-list {
+.animal-list-container {
   background-color: $light-bg;
   padding: 2rem;
   border-radius: 1rem;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-
-  .card {
-    border: none;
-    border-radius: 1rem;
-    overflow: hidden;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-  }
-
-  .card-header {
-    background-color: $primary-color;
-    color: white;
-    padding: 1rem 1.5rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    .btn-success {
-      background-color: $accent-color;
-      border: none;
-      font-weight: 600;
-
-      &:hover {
-        background-color: darken($accent-color, 8%);
-      }
-    }
-  }
-
-  .card-body {
-    padding: 1.5rem;
-  }
 }
 
-// Tabla de usuarios
+// Título de la tarjeta
+.card-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: $primary-color;
+}
+
+// Badges
+.badge {
+  padding: 0.25rem 0.6rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.badge-success {
+  background-color: $accent-color;
+  color: white;
+}
+
+.badge-warning {
+  background-color: $warning-color;
+  color: #212529;
+}
+
+.badge-danger {
+  background-color: $danger-color;
+  color: white;
+}
+
+// Tabla de animales
 .table-responsive {
   overflow-x: auto;
-  background-color: white;
+  background-color: #f0f4f8;
   border-radius: 0.5rem;
   padding: 1rem;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
@@ -60,21 +60,23 @@ table {
 }
 
 th {
-  background-color: $primary-color;
-  color: white;
+  background-color: #dce6f1;
+  color: #000;
   font-weight: 600;
   text-transform: uppercase;
   padding: 0.75rem;
   text-align: left;
+  border-bottom: 2px solid #444;
 }
 
 td {
   padding: 0.75rem;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid #555;
+  color: #333
 }
 
 tr:hover {
-  background-color: rgba($secondary-color, 0.08);
+  background-color: rgba(255, 255, 255, 0.08);
   transition: background-color 0.2s ease;
 }
 
@@ -115,6 +117,15 @@ button {
   }
 }
 
+.btn-warning {
+  background-color: $warning-color;
+  color: #212529;
+
+  &:hover {
+    background-color: darken($warning-color, 8%);
+  }
+}
+
 // Paginación
 .pagination {
   display: flex;
@@ -132,11 +143,6 @@ button {
       background-color: #c8d6c4;
       cursor: not-allowed;
     }
-  }
-
-  span {
-    font-weight: 600;
-    color: $primary-color;
   }
 }
 
@@ -226,29 +232,42 @@ button {
     font-weight: 600;
     color: #333;
   }
+}
 
-  .form-control {
-    display: block;
-    width: 100%;
-    padding: 0.4rem 0.75rem;
-    font-size: 1rem;
-    color: #495057;
-    background-color: #fff;
-    border: 1px solid #cddbd0;
-    border-radius: 0.4rem;
-    transition: border-color 0.2s, box-shadow 0.2s;
+.form-control {
+  display: block;
+  width: 100%;
+  padding: 0.4rem 0.75rem;
+  font-size: 1rem;
+  color: #495057;
+  background-color: #fff;
+  border: 1px solid #cddbd0;
+  border-radius: 0.4rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
 
-    &:focus {
-      border-color: $secondary-color;
-      outline: 0;
-      box-shadow: 0 0 0 0.2rem rgba($secondary-color, 0.25);
-    }
+  &:focus {
+    border-color: $secondary-color;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba($secondary-color, 0.25);
   }
 }
 
-// Encabezado
-.card-title {
-  color: $primary-color;
-  font-weight: 700;
-  font-size: 1.5rem;
+.form-check {
+  display: flex;
+  align-items: center;
+
+  .form-check-input {
+    margin-right: 0.5rem;
+  }
+
+  .form-check-label {
+    color: #495057;
+  }
+}
+
+// Filtros
+.filters {
+  .row > div {
+    margin-bottom: 0.5rem;
+  }
 }

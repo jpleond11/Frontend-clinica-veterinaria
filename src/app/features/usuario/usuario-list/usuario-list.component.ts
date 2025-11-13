@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { PaginationParams } from '../../../core/models/api-response.model';
+import { PaginationParams, ApiResponse } from '../../../core/models/api-response.model';
 import { UsuarioService } from '../../../core/services/usuario.service';
-import { Usuario, UsuarioFilters } from '../../../shared/models/usuario.model';
+import { Usuario } from '../../../shared/models/usuario.model';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-usuario-list',
@@ -18,36 +19,27 @@ export class UsuarioListComponent implements OnInit {
   currentPage = 1;
   totalPages = 1;
   pageSize = 10;
-  
-  filters: UsuarioFilters = {};
-  
-  // Modal properties
+
+  filtroId = '';
+
+  // Modal
   showModal = false;
   editingUsuario: Usuario | null = null;
   usuarioForm = {
-    email: '',
-    nombre: '',
-    apellido: '',
-    password: '',
-    activo: true
+    primer_nombre_usuario: '',
+    segundo_nombre_usuario: '',
+    primer_apellido_usuario: '',
+    segundo_apellido_usuario: '',
+    rol_usuario: '',
+    fecha_nacimiento_usuario: '',
+    nombre_usuario: '',
+    password: ''
   };
 
-  constructor(private usuarioService: UsuarioService) { }
+  constructor(private usuarioService: UsuarioService) {}
 
   ngOnInit(): void {
-    // Agregar un dato dummy para pruebas
-    this.usuarios = [{
-      id: 1,
-      email: 'admin@example.com',
-      nombre: 'Administrador',
-      apellido: 'Sistema',
-      activo: true,
-      ultimo_acceso: new Date().toISOString(),
-      fecha_creacion: new Date().toISOString(),
-      fecha_actualizacion: new Date().toISOString()
-    }];
-    this.totalPages = 1;
-    // this.loadUsuarios();
+    this.loadUsuarios();
   }
 
   loadUsuarios(): void {
@@ -57,10 +49,10 @@ export class UsuarioListComponent implements OnInit {
       limit: this.pageSize
     };
 
-    this.usuarioService.getUsuarios(pagination, this.filters).subscribe({
-      next: (response) => {
+    this.usuarioService.getUsuarios(pagination).subscribe({
+      next: (response: ApiResponse<Usuario[]>) => {
         this.usuarios = response.data;
-        this.totalPages = response.totalPages;
+        this.totalPages = Math.ceil(this.usuarios.length / this.pageSize);
         this.loading = false;
       },
       error: (error) => {
@@ -70,14 +62,33 @@ export class UsuarioListComponent implements OnInit {
     });
   }
 
+  buscarPorId(): void {
+          const id = this.filtroId.trim();
+          if (!id) {
+            this.loadUsuarios();
+            return;
+          }
+      
+          this.loading = true;
+          this.usuarioService.getUsuarioById(id).subscribe({
+            next: (usuario: Usuario) => {
+              this.usuarios = [usuario]; // mostrar solo el encontrado
+              this.totalPages = 1;
+              this.loading = false;
+            },
+            error: (err: HttpErrorResponse | any) => {
+              console.error('Error al buscar animal:', err);
+              this.usuarios = [];
+              this.loading = false;
+            }
+          });
+        }
+
   onFilterChange(): void {
-    this.currentPage = 1;
     this.loadUsuarios();
   }
 
   clearFilters(): void {
-    this.filters = {};
-    this.currentPage = 1;
     this.loadUsuarios();
   }
 
@@ -91,11 +102,14 @@ export class UsuarioListComponent implements OnInit {
   openCreateModal(): void {
     this.editingUsuario = null;
     this.usuarioForm = {
-      email: '',
-      nombre: '',
-      apellido: '',
-      password: '',
-      activo: true
+      primer_nombre_usuario: '',
+      segundo_nombre_usuario: '',
+      primer_apellido_usuario: '',
+      segundo_apellido_usuario: '',
+      rol_usuario: '',
+      fecha_nacimiento_usuario: '',
+      nombre_usuario: '',
+      password: ''
     };
     this.showModal = true;
   }
@@ -103,11 +117,14 @@ export class UsuarioListComponent implements OnInit {
   editUsuario(usuario: Usuario): void {
     this.editingUsuario = usuario;
     this.usuarioForm = {
-      email: usuario.email,
-      nombre: usuario.nombre,
-      apellido: usuario.apellido,
-      password: '',
-      activo: usuario.activo
+      primer_nombre_usuario: usuario.primer_nombre_usuario,
+      segundo_nombre_usuario: usuario.segundo_nombre_usuario || '',
+      primer_apellido_usuario: usuario.primer_apellido_usuario,
+      segundo_apellido_usuario: usuario.segundo_apellido_usuario || '',
+      rol_usuario: usuario.rol_usuario,
+      fecha_nacimiento_usuario: usuario.fecha_nacimiento_usuario,
+      nombre_usuario: usuario.nombre_usuario,
+      password: ''
     };
     this.showModal = true;
   }
@@ -115,41 +132,37 @@ export class UsuarioListComponent implements OnInit {
   closeModal(): void {
     this.showModal = false;
     this.editingUsuario = null;
-    this.usuarioForm = {
-      email: '',
-      nombre: '',
-      apellido: '',
-      password: '',
-      activo: true
-    };
   }
 
   saveUsuario(): void {
-    if (!this.usuarioForm.email.trim() || !this.usuarioForm.nombre.trim() || !this.usuarioForm.apellido.trim()) {
-      alert('Email, nombre y apellido son requeridos');
+    const form = this.usuarioForm;
+
+    if (!form.primer_nombre_usuario.trim() || !form.primer_apellido_usuario.trim() || !form.rol_usuario.trim() || !form.nombre_usuario.trim()) {
+      alert('Los campos obligatorios deben completarse');
       return;
     }
 
-    if (!this.editingUsuario && !this.usuarioForm.password.trim()) {
+    if (!this.editingUsuario && !form.password.trim()) {
       alert('La contraseña es requerida para nuevos usuarios');
       return;
     }
 
     if (this.editingUsuario) {
-      // Actualizar usuario existente
       const updateData: any = {
-        email: this.usuarioForm.email,
-        nombre: this.usuarioForm.nombre,
-        apellido: this.usuarioForm.apellido,
-        activo: this.usuarioForm.activo
+        primer_nombre_usuario: form.primer_nombre_usuario,
+        segundo_nombre_usuario: form.segundo_nombre_usuario,
+        primer_apellido_usuario: form.primer_apellido_usuario,
+        segundo_apellido_usuario: form.segundo_apellido_usuario,
+        rol_usuario: form.rol_usuario,
+        fecha_nacimiento_usuario: form.fecha_nacimiento_usuario,
+        nombre_usuario: form.nombre_usuario
       };
-      
-      // Solo incluir password si se proporcionó
-      if (this.usuarioForm.password.trim()) {
-        updateData.password = this.usuarioForm.password;
+
+      if (form.password.trim()) {
+        updateData.password = form.password;
       }
-      
-      this.usuarioService.updateUsuario(this.editingUsuario.id, updateData).subscribe({
+
+      this.usuarioService.updateUsuario(this.editingUsuario.id_usuario, updateData).subscribe({
         next: () => {
           this.loadUsuarios();
           this.closeModal();
@@ -160,15 +173,8 @@ export class UsuarioListComponent implements OnInit {
         }
       });
     } else {
-      // Crear nuevo usuario
-      const newUsuario = {
-        email: this.usuarioForm.email,
-        nombre: this.usuarioForm.nombre,
-        apellido: this.usuarioForm.apellido,
-        password: this.usuarioForm.password,
-        activo: this.usuarioForm.activo
-      };
-      
+      const newUsuario = { ...form };
+
       this.usuarioService.createUsuario(newUsuario).subscribe({
         next: () => {
           this.loadUsuarios();
@@ -183,11 +189,9 @@ export class UsuarioListComponent implements OnInit {
   }
 
   deleteUsuario(usuario: Usuario): void {
-    if (confirm(`¿Está seguro de eliminar el usuario "${usuario.email}"?`)) {
-      this.usuarioService.deleteUsuario(usuario.id).subscribe({
-        next: () => {
-          this.loadUsuarios();
-        },
+    if (confirm(`¿Está seguro de eliminar el usuario "${usuario.nombre_usuario}"?`)) {
+      this.usuarioService.deleteUsuario(usuario.id_usuario).subscribe({
+        next: () => this.loadUsuarios(),
         error: (error) => {
           console.error('Error al eliminar usuario:', error);
         }

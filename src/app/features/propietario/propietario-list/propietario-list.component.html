@@ -1,10 +1,9 @@
-<div class="usuario-list-container">
+<div class="propietario-list-container">
   <div class="card">
-    <!-- Encabezado -->
     <div class="card-header d-flex justify-content-between align-items-center">
-      <h2 class="card-title">Gestión de Usuarios</h2>
+      <h2 class="card-title">Gestión de Propietarios</h2>
       <button class="btn btn-primary" (click)="openCreateModal()">
-        Nuevo Usuario
+        Nuevo Propietario
       </button>
     </div>
 
@@ -12,22 +11,20 @@
       <!-- Filtro por ID -->
       <div class="filters mb-3">
         <div class="row align-items-center">
-          <div class="col-md-4 mb-2">
+          <div class="col-md-4">
             <input
               type="text"
               class="form-control"
-              placeholder="Buscar por ID de usuario"
+              placeholder="Buscar por ID..."
               [(ngModel)]="filtroId"
             />
           </div>
-
-          <div class="col-md-2 mb-2">
+          <div class="col-md-2">
             <button class="btn btn-primary w-100" (click)="buscarPorId()">
               Buscar
             </button>
           </div>
-
-          <div class="col-md-2 mb-2">
+          <div class="col-md-2">
             <button class="btn btn-secondary w-100" (click)="clearFilters()">
               Limpiar
             </button>
@@ -35,58 +32,53 @@
         </div>
       </div>
 
-      <!-- Tabla de Usuarios -->
+      <!-- Tabla de propietarios -->
       <div class="table-responsive">
         <table class="table table-striped table-hover">
           <thead class="table-light">
             <tr>
               <th>ID</th>
-              <th>Usuario</th>
-              <th>Nombre Completo</th>
-              <th>Rol</th>
-              <th>Fecha Nacimiento</th>
+              <th>Primer Nombre</th>
+              <th>Segundo Nombre</th>
+              <th>Primer Apellido</th>
+              <th>Segundo Apellido</th>
+              <th>Teléfono</th>
+              <th>Dirección</th>
+              <th>Fecha Creación</th>
               <th>Acciones</th>
             </tr>
           </thead>
 
           <tbody>
-            <!-- Estado de carga -->
             <tr *ngIf="loading">
-              <td colspan="6" class="text-center">Cargando...</td>
+              <td colspan="9" class="text-center">Cargando...</td>
             </tr>
 
-            <!-- Sin datos -->
-            <tr *ngIf="!loading && usuarios.length === 0">
-              <td colspan="6" class="text-center">No hay usuarios registrados</td>
-            </tr>
-
-            <!-- Datos -->
-            <tr
-              *ngFor="
-                let usuario of usuarios
-                  | slice: (currentPage - 1) * pageSize : currentPage * pageSize
-              "
-            >
-              <td>{{ usuario.id_usuario }}</td>
-              <td>{{ usuario.nombre_usuario }}</td>
-              <td>
-                {{ usuario.primer_nombre_usuario }}
-                {{ usuario.segundo_nombre_usuario || '' }}
-                {{ usuario.primer_apellido_usuario }}
-                {{ usuario.segundo_apellido_usuario || '' }}
+            <tr *ngIf="!loading && propietarios.length === 0">
+              <td colspan="9" class="text-center">
+                No hay propietarios registrados
               </td>
-              <td>{{ usuario.rol_usuario }}</td>
-              <td>{{ usuario.fecha_nacimiento_usuario | date: 'yyyy-MM-dd' }}</td>
+            </tr>
+
+            <tr *ngFor="let propietario of propietarios">
+              <td>{{ propietario.id_propietario }}</td>
+              <td>{{ propietario.primer_nombre_propietario }}</td>
+              <td>{{ propietario.segundo_nombre_propietario || '-' }}</td>
+              <td>{{ propietario.primer_apellido_propietario }}</td>
+              <td>{{ propietario.segundo_apellido_propietario || '-' }}</td>
+              <td>{{ propietario.telefono }}</td>
+              <td>{{ propietario.direccion }}</td>
+              <td>{{ propietario.fecha_creacion | date: 'short' }}</td>
               <td>
                 <button
                   class="btn btn-sm btn-primary me-2"
-                  (click)="editUsuario(usuario)"
+                  (click)="editPropietario(propietario)"
                 >
                   Editar
                 </button>
                 <button
                   class="btn btn-sm btn-danger"
-                  (click)="deleteUsuario(usuario)"
+                  (click)="deletePropietario(propietario)"
                 >
                   Eliminar
                 </button>
@@ -117,7 +109,7 @@
     </div>
   </div>
 
-  <!-- Modal Crear/Editar Usuario -->
+  <!-- Modal para crear/editar propietario -->
   <div
     class="modal fade"
     [class.show]="showModal"
@@ -127,27 +119,25 @@
   >
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
-        <!-- Header -->
         <div class="modal-header">
           <h5 class="modal-title">
-            {{ editingUsuario ? 'Editar Usuario' : 'Registrar Nuevo Usuario' }}
+            {{ editingPropietario ? 'Editar Propietario' : 'Registrar Nuevo Propietario' }}
           </h5>
           <button type="button" class="close" (click)="closeModal()">
             <span>&times;</span>
           </button>
         </div>
 
-        <!-- Body -->
         <div class="modal-body">
-          <form (ngSubmit)="saveUsuario()">
+          <form (ngSubmit)="savePropietario()">
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label>Primer Nombre *</label>
                 <input
                   type="text"
                   class="form-control"
-                  [(ngModel)]="usuarioForm.primer_nombre_usuario"
-                  name="primer_nombre_usuario"
+                  [(ngModel)]="propietarioForm.primer_nombre_propietario"
+                  name="primer_nombre_propietario"
                   required
                 />
               </div>
@@ -157,8 +147,8 @@
                 <input
                   type="text"
                   class="form-control"
-                  [(ngModel)]="usuarioForm.segundo_nombre_usuario"
-                  name="segundo_nombre_usuario"
+                  [(ngModel)]="propietarioForm.segundo_nombre_propietario"
+                  name="segundo_nombre_propietario"
                 />
               </div>
 
@@ -167,8 +157,8 @@
                 <input
                   type="text"
                   class="form-control"
-                  [(ngModel)]="usuarioForm.primer_apellido_usuario"
-                  name="primer_apellido_usuario"
+                  [(ngModel)]="propietarioForm.primer_apellido_propietario"
+                  name="primer_apellido_propietario"
                   required
                 />
               </div>
@@ -178,65 +168,42 @@
                 <input
                   type="text"
                   class="form-control"
-                  [(ngModel)]="usuarioForm.segundo_apellido_usuario"
-                  name="segundo_apellido_usuario"
+                  [(ngModel)]="propietarioForm.segundo_apellido_propietario"
+                  name="segundo_apellido_propietario"
                 />
               </div>
 
               <div class="col-md-6 mb-3">
-                <label>Rol *</label>
+                <label>Teléfono *</label>
                 <input
                   type="text"
                   class="form-control"
-                  [(ngModel)]="usuarioForm.rol_usuario"
-                  name="rol_usuario"
+                  [(ngModel)]="propietarioForm.telefono"
+                  name="telefono"
                   required
                 />
               </div>
 
               <div class="col-md-6 mb-3">
-                <label>Fecha de Nacimiento *</label>
-                <input
-                  type="date"
-                  class="form-control"
-                  [(ngModel)]="usuarioForm.fecha_nacimiento_usuario"
-                  name="fecha_nacimiento_usuario"
-                  required
-                />
-              </div>
-
-              <div class="col-md-6 mb-3">
-                <label>Nombre de Usuario *</label>
+                <label>Dirección *</label>
                 <input
                   type="text"
                   class="form-control"
-                  [(ngModel)]="usuarioForm.nombre_usuario"
-                  name="nombre_usuario"
+                  [(ngModel)]="propietarioForm.direccion"
+                  name="direccion"
                   required
-                />
-              </div>
-
-              <div class="col-md-6 mb-3" *ngIf="!editingUsuario">
-                <label>Contraseña *</label>
-                <input
-                  type="password"
-                  class="form-control"
-                  [(ngModel)]="usuarioForm.password"
-                  name="password"
-                  [required]="!editingUsuario"
                 />
               </div>
             </div>
           </form>
         </div>
 
-        <!-- Footer -->
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" (click)="closeModal()">
             Cancelar
           </button>
-          <button type="button" class="btn btn-primary" (click)="saveUsuario()">
-            {{ editingUsuario ? 'Actualizar' : 'Registrar' }}
+          <button type="button" class="btn btn-primary" (click)="savePropietario()">
+            {{ editingPropietario ? 'Actualizar' : 'Registrar' }}
           </button>
         </div>
       </div>
