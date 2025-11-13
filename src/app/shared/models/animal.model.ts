@@ -18,6 +18,8 @@ export interface Animal {
   };
   fecha_creacion: string;
   fecha_actualizacion: string;
+  usuario_id_creacion: string;
+  usuario_id_edicion?: string | null; //Opcional, se usa al actualizar
 }
 
 /**
@@ -29,6 +31,7 @@ export interface CreateAnimalRequest {
   fecha_nacimiento_animal: string;
   propietario_id: string;
   categoria_id: string;
+  usuario_id_creacion: string;
 }
 
 /**
@@ -40,6 +43,7 @@ export interface UpdateAnimalRequest {
   fecha_nacimiento_animal?: string;
   propietario_id?: string;
   categoria_id?: string;
+  usuario_id_edicion?: string | null;
 }
 
 /**

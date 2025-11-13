@@ -12,6 +12,8 @@ export interface Propietario {
 
   fecha_creacion: string;
   fecha_actualizacion: string;
+  usuario_id_creacion: string;
+  usuario_id_edicion?: string | null; //Opcional, se usa al actualizar
 }
 
 /**
@@ -24,6 +26,7 @@ export interface CreatePropietarioRequest {
   segundo_apellido_propietario: string;
   telefono: string;
   direccion: string;
+  usuario_id_creacion: string;
 }
 
 /**
@@ -36,6 +39,7 @@ export interface UpdatePropietarioRequest {
   segundo_apellido_propietario?: string;
   telefono?: string;
   direccion?: string;
+  usuario_id_edicion?: string | null;
 }
 
 /**

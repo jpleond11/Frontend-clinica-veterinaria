@@ -9,6 +9,8 @@ export interface Vacuna {
 
   fecha_creacion: string;
   fecha_actualizacion: string;
+  usuario_id_creacion: string;
+  usuario_id_edicion?: string | null; //Opcional, se usa al actualizar
 }
 
 /**
@@ -18,6 +20,7 @@ export interface CreateVacunaRequest {
   nombre_vacuna: string;
   fecha_aplicacion_vacuna: string;
   proxima_dosis_vacuna: string | null;
+  usuario_id_creacion: string;
 }
 
 /**
@@ -27,6 +30,7 @@ export interface UpdateVacunaRequest {
   nombre_vacuna?: string;
   fecha_aplicacion_vacuna?: string;
   proxima_dosis_vacuna?: string | null;
+  usuario_id_edicion?: string | null;
 }
 
 /**
