@@ -4,9 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { PaginationParams, ApiResponse } from '../../../core/models/api-response.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FacturaService } from '../../../core/services/factura.service';
-import { CitaService } from '../../../core/services/cita.service';
-import { Factura, FacturaFilters } from '../../../shared/models/factura.model';
-import { Cita } from '../../../shared/models/cita.model';
+import { Factura } from '../../../shared/models/factura.model';
 
 @Component({
   selector: 'app-factura-list',
@@ -17,13 +15,12 @@ import { Cita } from '../../../shared/models/cita.model';
 })
 export class FacturaListComponent implements OnInit {
   facturas: Factura[] = [];
-  citas: Cita[] = [];
   loading = false;
   currentPage = 1;
   totalPages = 1;
   pageSize = 10;
 
-  filters: FacturaFilters = {};
+  filtroId = '';
 
   // Modal
   showModal = false;
@@ -38,12 +35,10 @@ export class FacturaListComponent implements OnInit {
 
   constructor(
     private facturaService: FacturaService,
-    private citaService: CitaService
   ) {}
 
   ngOnInit(): void {
     this.loadFacturas();
-    this.loadCitas();
   }
 
   loadFacturas(): void {
@@ -53,10 +48,10 @@ export class FacturaListComponent implements OnInit {
       limit: this.pageSize
     };
 
-    this.facturaService.getFacturas(pagination, this.filters).subscribe({
-      next: (response: any) => {
+    this.facturaService.getFacturas(pagination).subscribe({
+      next: (response: ApiResponse<Factura[]>) => {
         this.facturas = response.data;
-        this.totalPages = response.totalPages || 1;
+        this.totalPages = Math.ceil(this.facturas.length / this.pageSize);
         this.loading = false;
       },
       error: (error: any) => {
@@ -66,40 +61,39 @@ export class FacturaListComponent implements OnInit {
     });
   }
 
-  loadCitas(): void {
-    this.loading = true;
-    const pagination: PaginationParams = {
-      page: this.currentPage,
-      limit: this.pageSize
-    };
-    this.citaService.getCitas(pagination).subscribe({
-      next: (response: ApiResponse<Cita[]>) => {
-        this.citas = response.data;
-        this.totalPages = Math.ceil(this.citas.length / this.pageSize);
-        this.loading = false;
-      },
-      error: (err: HttpErrorResponse | any) => {
-        console.error('Error al cargar citas:', err);
-        this.loading = false;
+  buscarPorId(): void {
+        const id = this.filtroId.trim();
+        if (!id) {
+          this.loadFacturas();
+          return;
+        }
+    
+        this.loading = true;
+        this.facturaService.getFacturaById(id).subscribe({
+          next: (factura: Factura) => {
+            this.facturas = [factura]; // mostrar solo el encontrado
+            this.totalPages = 1;
+            this.loading = false;
+          },
+          error: (err: HttpErrorResponse | any) => {
+            console.error('Error al buscar animal:', err);
+            this.facturas = [];
+            this.loading = false;
+          }
+        });
       }
-    });
-  }
 
   onFilterChange(): void {
-    this.currentPage = 1;
     this.loadFacturas();
   }
 
   clearFilters(): void {
-    this.filters = {};
-    this.currentPage = 1;
     this.loadFacturas();
   }
 
   goToPage(page: number): void {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
-      this.loadFacturas();
     }
   }
 
@@ -127,7 +121,6 @@ export class FacturaListComponent implements OnInit {
 
   closeModal(): void {
     this.showModal = false;
-    this.editingFactura = null;
   }
 
   saveFactura(): void {

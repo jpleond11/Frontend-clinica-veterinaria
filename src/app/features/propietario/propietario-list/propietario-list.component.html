@@ -8,29 +8,22 @@
     </div>
 
     <div class="card-body">
-      <!-- Filtros -->
+      <!-- Filtro por ID -->
       <div class="filters mb-3">
-        <div class="row">
+        <div class="row align-items-center">
           <div class="col-md-4">
             <input
               type="text"
               class="form-control"
-              placeholder="Buscar por nombre..."
-              [(ngModel)]="filters.nombre"
-              (input)="onFilterChange()"
+              placeholder="Buscar por ID..."
+              [(ngModel)]="filtroId"
             />
           </div>
-
-          <div class="col-md-4">
-            <input
-              type="text"
-              class="form-control"
-              placeholder="Buscar por apellido..."
-              [(ngModel)]="filters.apellido"
-              (input)="onFilterChange()"
-            />
+          <div class="col-md-2">
+            <button class="btn btn-primary w-100" (click)="buscarPorId()">
+              Buscar
+            </button>
           </div>
-
           <div class="col-md-2">
             <button class="btn btn-secondary w-100" (click)="clearFilters()">
               Limpiar
@@ -41,8 +34,8 @@
 
       <!-- Tabla de propietarios -->
       <div class="table-responsive">
-        <table class="table">
-          <thead>
+        <table class="table table-striped table-hover">
+          <thead class="table-light">
             <tr>
               <th>ID</th>
               <th>Primer Nombre</th>
@@ -62,7 +55,9 @@
             </tr>
 
             <tr *ngIf="!loading && propietarios.length === 0">
-              <td colspan="9" class="text-center">No hay propietarios registrados</td>
+              <td colspan="9" class="text-center">
+                No hay propietarios registrados
+              </td>
             </tr>
 
             <tr *ngFor="let propietario of propietarios">
@@ -73,12 +68,18 @@
               <td>{{ propietario.segundo_apellido_propietario || '-' }}</td>
               <td>{{ propietario.telefono }}</td>
               <td>{{ propietario.direccion }}</td>
-              <td>{{ propietario.fecha_creacion | date:'short' }}</td>
+              <td>{{ propietario.fecha_creacion | date: 'short' }}</td>
               <td>
-                <button class="btn btn-sm btn-primary" (click)="editPropietario(propietario)">
+                <button
+                  class="btn btn-sm btn-primary me-2"
+                  (click)="editPropietario(propietario)"
+                >
                   Editar
                 </button>
-                <button class="btn btn-sm btn-danger" (click)="deletePropietario(propietario)">
+                <button
+                  class="btn btn-sm btn-danger"
+                  (click)="deletePropietario(propietario)"
+                >
                   Eliminar
                 </button>
               </td>
@@ -88,7 +89,7 @@
       </div>
 
       <!-- Paginación -->
-      <div class="pagination mt-3" *ngIf="totalPages > 1">
+      <div class="pagination mt-3 text-center" *ngIf="totalPages > 1">
         <button
           class="btn btn-secondary"
           [disabled]="currentPage === 1"
@@ -130,90 +131,68 @@
         <div class="modal-body">
           <form (ngSubmit)="savePropietario()">
             <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Primer Nombre *</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    [(ngModel)]="propietarioForm.primer_nombre_propietario"
-                    name="primer_nombre_propietario"
-                    required
-                    placeholder="Ingrese el primer nombre"
-                  />
-                </div>
+              <div class="col-md-6 mb-3">
+                <label>Primer Nombre *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="propietarioForm.primer_nombre_propietario"
+                  name="primer_nombre_propietario"
+                  required
+                />
               </div>
 
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Segundo Nombre</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    [(ngModel)]="propietarioForm.segundo_nombre_propietario"
-                    name="segundo_nombre_propietario"
-                    placeholder="Ingrese el segundo nombre"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Primer Apellido *</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    [(ngModel)]="propietarioForm.primer_apellido_propietario"
-                    name="primer_apellido_propietario"
-                    required
-                    placeholder="Ingrese el primer apellido"
-                  />
-                </div>
+              <div class="col-md-6 mb-3">
+                <label>Segundo Nombre</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="propietarioForm.segundo_nombre_propietario"
+                  name="segundo_nombre_propietario"
+                />
               </div>
 
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Segundo Apellido</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    [(ngModel)]="propietarioForm.segundo_apellido_propietario"
-                    name="segundo_apellido_propietario"
-                    placeholder="Ingrese el segundo apellido"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Teléfono *</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    [(ngModel)]="propietarioForm.telefono"
-                    name="telefono"
-                    required
-                    placeholder="Ejemplo: 3001234567"
-                  />
-                </div>
+              <div class="col-md-6 mb-3">
+                <label>Primer Apellido *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="propietarioForm.primer_apellido_propietario"
+                  name="primer_apellido_propietario"
+                  required
+                />
               </div>
 
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Dirección *</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    [(ngModel)]="propietarioForm.direccion"
-                    name="direccion"
-                    required
-                    placeholder="Ingrese la dirección"
-                  />
-                </div>
+              <div class="col-md-6 mb-3">
+                <label>Segundo Apellido</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="propietarioForm.segundo_apellido_propietario"
+                  name="segundo_apellido_propietario"
+                />
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label>Teléfono *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="propietarioForm.telefono"
+                  name="telefono"
+                  required
+                />
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label>Dirección *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="propietarioForm.direccion"
+                  name="direccion"
+                  required
+                />
               </div>
             </div>
           </form>

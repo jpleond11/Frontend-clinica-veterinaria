@@ -1,5 +1,6 @@
 <div class="factura-list-container">
   <div class="card">
+    <!-- Encabezado -->
     <div class="card-header d-flex justify-content-between align-items-center">
       <h2 class="card-title">Gestión de Facturas</h2>
       <button class="btn btn-primary" (click)="openCreateModal()">
@@ -8,37 +9,22 @@
     </div>
 
     <div class="card-body">
-      <!-- Filtros -->
+      <!-- Filtro por ID -->
       <div class="filters mb-3">
-        <div class="row">
-          <div class="col-md-3">
+        <div class="row align-items-center">
+          <div class="col-md-4">
             <input
               type="text"
               class="form-control"
-              placeholder="Buscar por descripción..."
-              [(ngModel)]="filters.descripcion_factura"
-              (input)="onFilterChange()"
+              placeholder="Buscar por ID de factura (UUID)"
+              [(ngModel)]="filtroId"
             />
           </div>
 
-          <div class="col-md-3">
-            <input
-              type="number"
-              class="form-control"
-              placeholder="Filtrar por monto mínimo..."
-              [(ngModel)]="filters.monto_factura_max"
-              (input)="onFilterChange()"
-            />
-          </div>
-
-          <div class="col-md-3">
-            <input
-              type="number"
-              class="form-control"
-              placeholder="Filtrar por monto máximo..."
-              [(ngModel)]="filters.monto_factura_max"
-              (input)="onFilterChange()"
-            />
+          <div class="col-md-2">
+            <button class="btn btn-primary w-100" (click)="buscarPorId()">
+              Buscar
+            </button>
           </div>
 
           <div class="col-md-2">
@@ -49,41 +35,54 @@
         </div>
       </div>
 
-      <!-- Tabla de facturas -->
+      <!-- Tabla de Facturas -->
       <div class="table-responsive">
-        <table class="table">
-          <thead>
+        <table class="table table-striped table-hover">
+          <thead class="table-light">
             <tr>
               <th>ID</th>
               <th>Monto</th>
               <th>Descripción</th>
               <th>Fecha Emisión</th>
               <th>Cita Asociada</th>
-              <th>Fecha Creación</th>
               <th>Acciones</th>
             </tr>
           </thead>
+
           <tbody>
+            <!-- Estado de carga -->
             <tr *ngIf="loading">
-              <td colspan="7" class="text-center">Cargando...</td>
+              <td colspan="6" class="text-center">Cargando...</td>
             </tr>
 
+            <!-- Sin datos -->
             <tr *ngIf="!loading && facturas.length === 0">
-              <td colspan="7" class="text-center">No hay facturas registradas</td>
+              <td colspan="6" class="text-center">No hay facturas registradas</td>
             </tr>
 
-            <tr *ngFor="let factura of facturas">
+            <!-- Datos -->
+            <tr
+              *ngFor="
+                let factura of facturas
+                  | slice: (currentPage - 1) * pageSize : currentPage * pageSize
+              "
+            >
               <td>{{ factura.id_factura }}</td>
               <td>{{ factura.monto_factura | currency:'COP':'symbol':'1.0-0' }}</td>
               <td>{{ factura.descripcion_factura }}</td>
-              <td>{{ factura.fecha_emision | date:'mediumDate' }}</td>
+              <td>{{ factura.fecha_emision | date:'yyyy-MM-dd' }}</td>
               <td>{{ factura.cita_id || '-' }}</td>
-              <td>{{ factura.fecha_creacion | date:'short' }}</td>
               <td>
-                <button class="btn btn-sm btn-primary" (click)="editFactura(factura)">
+                <button
+                  class="btn btn-sm btn-primary me-2"
+                  (click)="editFactura(factura)"
+                >
                   Editar
                 </button>
-                <button class="btn btn-sm btn-danger" (click)="deleteFactura(factura)">
+                <button
+                  class="btn btn-sm btn-danger"
+                  (click)="deleteFactura(factura)"
+                >
                   Eliminar
                 </button>
               </td>
@@ -93,7 +92,7 @@
       </div>
 
       <!-- Paginación -->
-      <div class="pagination mt-3" *ngIf="totalPages > 1">
+      <div class="pagination mt-3 text-center" *ngIf="totalPages > 1">
         <button
           class="btn btn-secondary"
           [disabled]="currentPage === 1"
@@ -113,7 +112,7 @@
     </div>
   </div>
 
-  <!-- Modal para crear/editar factura -->
+  <!-- Modal para Crear/Editar Factura -->
   <div
     class="modal fade"
     [class.show]="showModal"
@@ -123,6 +122,7 @@
   >
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
+        <!-- Header -->
         <div class="modal-header">
           <h5 class="modal-title">
             {{ editingFactura ? 'Editar Factura' : 'Registrar Nueva Factura' }}
@@ -132,40 +132,37 @@
           </button>
         </div>
 
+        <!-- Body -->
         <div class="modal-body">
           <form (ngSubmit)="saveFactura()">
             <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label for="monto_factura">Monto *</label>
-                  <input
-                    type="number"
-                    class="form-control"
-                    id="monto_factura"
-                    [(ngModel)]="facturaForm.monto_factura"
-                    name="monto_factura"
-                    required
-                    placeholder="Ingrese el monto"
-                  />
-                </div>
+              <div class="col-md-6 mb-3">
+                <label for="monto_factura">Monto *</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="monto_factura"
+                  [(ngModel)]="facturaForm.monto_factura"
+                  name="monto_factura"
+                  required
+                  placeholder="Ingrese el monto"
+                />
               </div>
 
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label for="fecha_emision">Fecha de Emisión *</label>
-                  <input
-                    type="date"
-                    class="form-control"
-                    id="fecha_emision"
-                    [(ngModel)]="facturaForm.fecha_emision"
-                    name="fecha_emision"
-                    required
-                  />
-                </div>
+              <div class="col-md-6 mb-3">
+                <label for="fecha_emision">Fecha de Emisión *</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  id="fecha_emision"
+                  [(ngModel)]="facturaForm.fecha_emision"
+                  name="fecha_emision"
+                  required
+                />
               </div>
             </div>
 
-            <div class="form-group">
+            <div class="mb-3">
               <label for="descripcion_factura">Descripción *</label>
               <textarea
                 class="form-control"
@@ -178,24 +175,22 @@
               ></textarea>
             </div>
 
-            <div class="form-group">
-              <label for="cita_id">Cita Asociada *</label>
-              <select
+            <div class="mb-3">
+              <label for="cita_id">Cita Asociada (UUID) *</label>
+              <input
+                type="text"
                 class="form-control"
                 id="cita_id"
                 [(ngModel)]="facturaForm.cita_id"
                 name="cita_id"
                 required
-              >
-                <option value="">Seleccione una cita</option>
-                <option *ngFor="let cita of citas" [value]="cita.id_cita">
-                  Cita #{{ cita.id_cita }} - {{ cita.motivo_cita }}
-                </option>
-              </select>
+                placeholder="ID de la cita asociada"
+              />
             </div>
           </form>
         </div>
 
+        <!-- Footer -->
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" (click)="closeModal()">
             Cancelar

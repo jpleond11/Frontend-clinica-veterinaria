@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { PaginationParams } from '../../../core/models/api-response.model';
+import { PaginationParams, ApiResponse } from '../../../core/models/api-response.model';
 import { VacunaService } from '../../../core/services/vacuna.service';
-import { Vacuna, VacunaFilters } from '../../../shared/models/vacuna.model';
+import { Vacuna } from '../../../shared/models/vacuna.model';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-vacuna-list',
@@ -19,7 +20,7 @@ export class VacunaListComponent implements OnInit {
   totalPages = 1;
   pageSize = 10;
 
-  filters: VacunaFilters = {};
+  filtroId = '';
 
   // Modal
   showModal = false;
@@ -44,7 +45,7 @@ export class VacunaListComponent implements OnInit {
       limit: this.pageSize
     };
 
-    this.vacunaService.getVacunas(pagination, this.filters).subscribe({
+    this.vacunaService.getVacunas(pagination).subscribe({
       next: (response) => {
         this.vacunas = response.data;
         this.totalPages = Math.ceil(response.data.length / this.pageSize);
@@ -57,14 +58,33 @@ export class VacunaListComponent implements OnInit {
     });
   }
 
+  buscarPorId(): void {
+            const id = this.filtroId.trim();
+            if (!id) {
+              this.loadVacunas();
+              return;
+            }
+        
+            this.loading = true;
+            this.vacunaService.getVacunaById(id).subscribe({
+              next: (vacuna: Vacuna) => {
+                this.vacunas = [vacuna]; // mostrar solo el encontrado
+                this.totalPages = 1;
+                this.loading = false;
+              },
+              error: (err: HttpErrorResponse | any) => {
+                console.error('Error al buscar animal:', err);
+                this.vacunas = [];
+                this.loading = false;
+              }
+            });
+          }
+
   onFilterChange(): void {
-    this.currentPage = 1;
     this.loadVacunas();
   }
 
   clearFilters(): void {
-    this.filters = {};
-    this.currentPage = 1;
     this.loadVacunas();
   }
 

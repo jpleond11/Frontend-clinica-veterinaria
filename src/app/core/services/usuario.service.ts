@@ -5,7 +5,6 @@ import { environment } from '../../../environments/environment';
 import { Usuario, UsuarioFilters } from '../../shared/models/usuario.model';
 import {
   ApiResponse,
-  PaginatedResponse,
   PaginationParams
 } from '../models/api-response.model';
 
@@ -23,7 +22,7 @@ export class UsuarioService {
   getUsuarios(
     pagination: PaginationParams,
     filters?: UsuarioFilters
-  ): Observable<PaginatedResponse<Usuario>> {
+  ): Observable<ApiResponse<Usuario[]>> {
     let params = new HttpParams()
       .set('skip', ((pagination.page - 1) * pagination.limit).toString())
       .set('limit', pagination.limit.toString());
@@ -38,21 +37,14 @@ export class UsuarioService {
     }
 
     return this.http.get<Usuario[]>(this.baseUrl, { params }).pipe(
-      map((usuarios) => {
-        const total = usuarios.length;
-        const totalPages = Math.ceil(total / pagination.limit) || 1;
-
-        const response: PaginatedResponse<Usuario> = {
-          data: usuarios,
-          total,
-          page: pagination.page,
-          limit: pagination.limit,
-          totalPages
-        };
-        return response;
-      })
-    );
-  }
+          map((usuarios) => ({
+            data: usuarios,
+            message: 'Usuarios obtenidos correctamente',
+            success: true,
+            status: 200
+          }))
+        );
+      }
 
   /**
    * Obtener un usuario por ID

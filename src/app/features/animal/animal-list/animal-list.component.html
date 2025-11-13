@@ -11,15 +11,20 @@
     <div class="card-body">
       <!-- Filtro por ID -->
       <div class="filters mb-3">
-        <div class="row">
-          <div class="col-md-6">
+        <div class="row align-items-center">
+          <div class="col-md-4">
             <input
               type="text"
               class="form-control"
               placeholder="Buscar por ID de animal (UUID)"
               [(ngModel)]="filtroId"
-              (input)="buscarPorId()"
             />
+          </div>
+
+          <div class="col-md-2">
+            <button class="btn btn-primary w-100" (click)="buscarPorId()">
+              Buscar
+            </button>
           </div>
 
           <div class="col-md-2">

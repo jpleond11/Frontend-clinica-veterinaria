@@ -39,6 +39,7 @@ export interface CreateCitaRequest {
   animal_id: string;
   vacuna_id?: string;
   veterinario_id: string;
+  usuario_id_creacion: string;
 }
 
 /**

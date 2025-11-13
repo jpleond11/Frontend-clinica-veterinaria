@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { PaginationParams } from '../../../core/models/api-response.model';
+import { PaginationParams, ApiResponse } from '../../../core/models/api-response.model';
 import { UsuarioService } from '../../../core/services/usuario.service';
-import { Usuario, UsuarioFilters } from '../../../shared/models/usuario.model';
+import { Usuario } from '../../../shared/models/usuario.model';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-usuario-list',
@@ -19,7 +20,7 @@ export class UsuarioListComponent implements OnInit {
   totalPages = 1;
   pageSize = 10;
 
-  filters: UsuarioFilters = {};
+  filtroId = '';
 
   // Modal
   showModal = false;
@@ -48,10 +49,10 @@ export class UsuarioListComponent implements OnInit {
       limit: this.pageSize
     };
 
-    this.usuarioService.getUsuarios(pagination, this.filters).subscribe({
-      next: (response) => {
+    this.usuarioService.getUsuarios(pagination).subscribe({
+      next: (response: ApiResponse<Usuario[]>) => {
         this.usuarios = response.data;
-        this.totalPages = response.totalPages;
+        this.totalPages = Math.ceil(this.usuarios.length / this.pageSize);
         this.loading = false;
       },
       error: (error) => {
@@ -61,14 +62,33 @@ export class UsuarioListComponent implements OnInit {
     });
   }
 
+  buscarPorId(): void {
+          const id = this.filtroId.trim();
+          if (!id) {
+            this.loadUsuarios();
+            return;
+          }
+      
+          this.loading = true;
+          this.usuarioService.getUsuarioById(id).subscribe({
+            next: (usuario: Usuario) => {
+              this.usuarios = [usuario]; // mostrar solo el encontrado
+              this.totalPages = 1;
+              this.loading = false;
+            },
+            error: (err: HttpErrorResponse | any) => {
+              console.error('Error al buscar animal:', err);
+              this.usuarios = [];
+              this.loading = false;
+            }
+          });
+        }
+
   onFilterChange(): void {
-    this.currentPage = 1;
     this.loadUsuarios();
   }
 
   clearFilters(): void {
-    this.filters = {};
-    this.currentPage = 1;
     this.loadUsuarios();
   }
 

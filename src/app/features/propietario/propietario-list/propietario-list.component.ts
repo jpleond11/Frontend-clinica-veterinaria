@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { PaginationParams } from '../../../core/models/api-response.model';
+import { PaginationParams, ApiResponse } from '../../../core/models/api-response.model';
 import { PropietarioService } from '../../../core/services/propietario.service';
-import { Propietario, PropietarioFilters } from '../../../shared/models/propietario.model';
+import { Propietario } from '../../../shared/models/propietario.model';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-propietario-list',
@@ -20,10 +21,7 @@ export class PropietarioListComponent implements OnInit {
   totalPages = 1;
   pageSize = 10;
 
-  filters: PropietarioFilters = {
-    nombre: '',
-    apellido: ''
-  };
+  filtroId = '';
 
   // Modal
   showModal = false;
@@ -52,10 +50,10 @@ export class PropietarioListComponent implements OnInit {
       limit: this.pageSize
     };
 
-    this.propietarioService.getPropietarios(pagination, this.filters).subscribe({
-      next: (response: any) => {
+    this.propietarioService.getPropietarios(pagination).subscribe({
+      next: (response: ApiResponse<Propietario[]>) => {
         this.propietarios = response.data;
-        this.totalPages = response.totalPages || 1;
+        this.totalPages = Math.ceil(this.propietarios.length / this.pageSize);
         this.loading = false;
       },
       error: (error: any) => {
@@ -66,14 +64,33 @@ export class PropietarioListComponent implements OnInit {
   }
 
   // Filtrar
+buscarPorId(): void {
+        const id = this.filtroId.trim();
+        if (!id) {
+          this.loadPropietarios();
+          return;
+        }
+    
+        this.loading = true;
+        this.propietarioService.getPropietarioById(id).subscribe({
+          next: (propietario: Propietario) => {
+            this.propietarios = [propietario]; // mostrar solo el encontrado
+            this.totalPages = 1;
+            this.loading = false;
+          },
+          error: (err: HttpErrorResponse | any) => {
+            console.error('Error al buscar animal:', err);
+            this.propietarios = [];
+            this.loading = false;
+          }
+        });
+      }
+
   onFilterChange(): void {
-    this.currentPage = 1;
     this.loadPropietarios();
   }
 
   clearFilters(): void {
-    this.filters = { nombre: '', apellido: '' };
-    this.currentPage = 1;
     this.loadPropietarios();
   }
 
@@ -117,7 +134,7 @@ export class PropietarioListComponent implements OnInit {
     this.editingPropietario = null;
   }
 
-  // 🔹 Guardar (crear o actualizar)
+  // Guardar (crear o actualizar)
   savePropietario(): void {
     const form = this.propietarioForm;
 

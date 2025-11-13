@@ -3,7 +3,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { PaginationParams } from '../../../core/models/api-response.model';
 import { VeterinarioService } from '../../../core/services/veterinario.service';
-import { Veterinario, VeterinarioFilters } from '../../../shared/models/veterinario.model';
+import { Veterinario } from '../../../shared/models/veterinario.model';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-veterinario-list',
@@ -19,7 +20,7 @@ export class VeterinarioListComponent implements OnInit {
   totalPages = 1;
   pageSize = 10;
 
-  filters: VeterinarioFilters = {};
+  filtroId = '';
 
   // Modal
   showModal = false;
@@ -49,10 +50,10 @@ export class VeterinarioListComponent implements OnInit {
       limit: this.pageSize
     };
 
-    this.veterinarioService.getVeterinarios(pagination, this.filters).subscribe({
+    this.veterinarioService.getVeterinarios(pagination).subscribe({
       next: (response: any) => {
         this.veterinarios = response.data;
-        this.totalPages = response.totalPages || 1;
+        this.totalPages = Math.ceil(response.data.length / this.pageSize);
         this.loading = false;
       },
       error: (error: any) => {
@@ -62,14 +63,33 @@ export class VeterinarioListComponent implements OnInit {
     });
   }
 
+  buscarPorId(): void {
+              const id = this.filtroId.trim();
+              if (!id) {
+                this.loadVeterinarios();
+                return;
+              }
+          
+              this.loading = true;
+              this.veterinarioService.getVeterinarioById(id).subscribe({
+                next: (veterinario: Veterinario) => {
+                  this.veterinarios = [veterinario]; // mostrar solo el encontrado
+                  this.totalPages = 1;
+                  this.loading = false;
+                },
+                error: (err: HttpErrorResponse | any) => {
+                  console.error('Error al buscar animal:', err);
+                  this.veterinarios = [];
+                  this.loading = false;
+                }
+              });
+            }
+
   onFilterChange(): void {
-    this.currentPage = 1;
     this.loadVeterinarios();
   }
 
   clearFilters(): void {
-    this.filters = {};
-    this.currentPage = 1;
     this.loadVeterinarios();
   }
 
