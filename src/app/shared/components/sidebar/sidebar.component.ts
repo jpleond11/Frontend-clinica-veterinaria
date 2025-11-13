@@ -4,20 +4,21 @@ import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 
 declare interface RouteInfo {
-    path: string;
-    title: string;
-    icon: string;
-    class: string;
-    roles?: string[];
+  path: string;
+  title: string;
+  icon: string;
+  class: string;
+  roles?: string[];
 }
 
 export const ROUTES: RouteInfo[] = [
-    { path: '/dashboard', title: 'Dashboard',  icon: 'design_app', class: '' },
-    { path: '/categorias', title: 'Categorías',  icon:'shopping_basket', class: '', roles: ['admin'] },
-    { path: '/usuarios', title: 'Usuarios',  icon:'users_single-02', class: '', roles: ['admin'] },
-    { path: '/productos', title: 'Productos',  icon:'shopping_box', class: '' },
-    { path: '/notifications', title: 'Notificaciones',  icon:'ui-1_bell-53', class: '', roles: ['admin'] },
-    { path: '/upgrade', title: 'Configuración',  icon:'objects_spaceship', class: 'active active-pro', roles: ['admin'] }
+  { path: '/animales', title: 'Animales', icon: 'pets', class: '' },
+  { path: '/citas', title: 'Citas', icon: 'event', class: '' },
+  { path: '/facturas', title: 'Facturas', icon: 'receipt_long', class: '' },
+  { path: '/propietarios', title: 'Propietarios', icon: 'person', class: '' },
+  { path: '/usuarios', title: 'Usuarios', icon: 'supervisor_account', class: '', roles: ['admin'] },
+  { path: '/vacunas', title: 'Vacunas', icon: 'vaccines', class: '' },
+  { path: '/veterinarios', title: 'Veterinarios', icon: 'medical_services', class: '' },
 ];
 
 @Component({
@@ -33,7 +34,7 @@ export class SidebarComponent implements OnInit {
   constructor(
     public authService: AuthService,
     private router: Router
-  ) { }
+  ) {}
 
   ngOnInit() {
     this.menuItems = ROUTES.filter(menuItem => this.canAccessMenuItem(menuItem));
@@ -49,12 +50,9 @@ export class SidebarComponent implements OnInit {
     const userRole = this.authService.getUserRole();
     return userRole ? menuItem.roles.includes(userRole) : false;
   }
-  
+
   isMobileMenu() {
-      if ( window.innerWidth > 991) {
-          return false;
-      }
-      return true;
+    return window.innerWidth <= 991;
   }
 
   logout() {

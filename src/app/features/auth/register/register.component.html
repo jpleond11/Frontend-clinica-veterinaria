@@ -1,0 +1,197 @@
+<div class="register-container">
+  <div class="register-card slide-in-up">
+    <div class="card glass">
+      <div class="card-header text-center">
+        <div class="register-icon">✨</div>
+        <h2 class="card-title text-title-contrast">Crear Cuenta</h2>
+        <p class="register-subtitle text-high-contrast">
+          Completa tus datos para registrarte
+        </p>
+      </div>
+
+      <div class="card-body">
+        <form (ngSubmit)="onSubmit()" #registerForm="ngForm" novalidate>
+          <!-- Primer Nombre -->
+          <div class="form-group">
+            <label for="primer_nombre_usuario" class="form-label">
+              <span class="label-icon">👤</span> Primer Nombre *
+            </label>
+            <input
+              type="text"
+              id="primer_nombre_usuario"
+              class="form-control"
+              name="primer_nombre_usuario"
+              [(ngModel)]="registerData.primer_nombre_usuario"
+              required
+              minlength="2"
+              #primer_nombre_usuario="ngModel"
+              [class.is-invalid]="primer_nombre_usuario.invalid && primer_nombre_usuario.touched"
+            />
+            <div class="invalid-feedback" *ngIf="primer_nombre_usuario.invalid && primer_nombre_usuario.touched">
+              <div *ngIf="primer_nombre_usuario.errors?.['required']">Campo requerido</div>
+              <div *ngIf="primer_nombre_usuario.errors?.['minlength']">Debe tener al menos 2 caracteres</div>
+            </div>
+          </div>
+
+          <!-- Segundo Nombre -->
+          <div class="form-group">
+            <label for="segundo_nombre_usuario" class="form-label">
+              <span class="label-icon">👤</span> Segundo Nombre
+            </label>
+            <input
+              type="text"
+              id="segundo_nombre_usuario"
+              class="form-control"
+              name="segundo_nombre_usuario"
+              [(ngModel)]="registerData.segundo_nombre_usuario"
+            />
+          </div>
+
+          <!-- Primer Apellido -->
+          <div class="form-group">
+            <label for="primer_apellido_usuario" class="form-label">
+              <span class="label-icon">👥</span> Primer Apellido *
+            </label>
+            <input
+              type="text"
+              id="primer_apellido_usuario"
+              class="form-control"
+              name="primer_apellido_usuario"
+              [(ngModel)]="registerData.primer_apellido_usuario"
+              required
+              minlength="2"
+              #primer_apellido_usuario="ngModel"
+              [class.is-invalid]="primer_apellido_usuario.invalid && primer_apellido_usuario.touched"
+            />
+            <div class="invalid-feedback" *ngIf="primer_apellido_usuario.invalid && primer_apellido_usuario.touched">
+              <div *ngIf="primer_apellido_usuario.errors?.['required']">Campo requerido</div>
+              <div *ngIf="primer_apellido_usuario.errors?.['minlength']">Debe tener al menos 2 caracteres</div>
+            </div>
+          </div>
+
+          <!-- Segundo Apellido -->
+          <div class="form-group">
+            <label for="segundo_apellido_usuario" class="form-label">
+              <span class="label-icon">👥</span> Segundo Apellido
+            </label>
+            <input
+              type="text"
+              id="segundo_apellido_usuario"
+              class="form-control"
+              name="segundo_apellido_usuario"
+              [(ngModel)]="registerData.segundo_apellido_usuario"
+            />
+          </div>
+
+          <!-- Rol -->
+          <div class="form-group">
+            <label for="rol_usuario" class="form-label">
+              <span class="label-icon">🎯</span> Rol *
+            </label>
+            <select
+              id="rol_usuario"
+              class="form-control"
+              name="rol_usuario"
+              [(ngModel)]="registerData.rol_usuario"
+              required
+            >
+              <option value="cliente">Cliente</option>
+              <option value="veterinario">Veterinario</option>
+              <option value="admin">Administrador</option>
+            </select>
+          </div>
+
+          <!-- Fecha de nacimiento -->
+          <div class="form-group">
+            <label for="fecha_nacimiento_usuario" class="form-label">
+              <span class="label-icon">🎂</span> Fecha de nacimiento *
+            </label>
+            <input
+              type="date"
+              id="fecha_nacimiento_usuario"
+              class="form-control"
+              name="fecha_nacimiento_usuario"
+              [(ngModel)]="registerData.fecha_nacimiento_usuario"
+              required
+              #fecha_nacimiento_usuario="ngModel"
+              [class.is-invalid]="fecha_nacimiento_usuario.invalid && fecha_nacimiento_usuario.touched"
+            />
+            <div class="invalid-feedback" *ngIf="fecha_nacimiento_usuario.invalid && fecha_nacimiento_usuario.touched">
+              <div *ngIf="fecha_nacimiento_usuario.errors?.['required']">Campo requerido</div>
+            </div>
+          </div>
+
+          <!-- Nombre de usuario -->
+          <div class="form-group">
+            <label for="nombre_usuario" class="form-label">
+              <span class="label-icon">💻</span> Nombre de Usuario *
+            </label>
+            <input
+              type="text"
+              id="nombre_usuario"
+              class="form-control"
+              name="nombre_usuario"
+              [(ngModel)]="registerData.nombre_usuario"
+              required
+              minlength="3"
+              #nombre_usuario="ngModel"
+              [class.is-invalid]="nombre_usuario.invalid && nombre_usuario.touched"
+            />
+            <div class="invalid-feedback" *ngIf="nombre_usuario.invalid && nombre_usuario.touched">
+              <div *ngIf="nombre_usuario.errors?.['required']">Campo requerido</div>
+              <div *ngIf="nombre_usuario.errors?.['minlength']">Debe tener al menos 3 caracteres</div>
+            </div>
+          </div>
+
+          <!-- Contraseña -->
+          <div class="form-group">
+            <label for="password" class="form-label">
+              <span class="label-icon">🔑</span> Contraseña *
+            </label>
+            <input
+              type="password"
+              id="password"
+              class="form-control"
+              name="password"
+              [(ngModel)]="registerData.password"
+              required
+              minlength="6"
+              #password="ngModel"
+              [class.is-invalid]="password.invalid && password.touched"
+            />
+            <div class="invalid-feedback" *ngIf="password.invalid && password.touched">
+              <div *ngIf="password.errors?.['required']">Campo requerido</div>
+              <div *ngIf="password.errors?.['minlength']">Debe tener al menos 6 caracteres</div>
+            </div>
+          </div>
+
+          <!-- Botón de registro -->
+          <div class="form-group mt-3">
+            <button
+              type="submit"
+              class="btn btn-primary w-100 btn-lg"
+              [disabled]="registerForm.invalid || loading"
+              [class.loading]="loading"
+            >
+              <span *ngIf="loading" class="spinner"></span>
+              <span *ngIf="loading">Registrando...</span>
+              <span *ngIf="!loading">
+                <span class="btn-icon">✨</span>
+                Crear Cuenta
+              </span>
+            </button>
+          </div>
+
+          <!-- Enlace a login -->
+          <div class="form-options text-center mt-3">
+            <span class="login-text">¿Ya tienes una cuenta?</span>
+            <a routerLink="/auth/login" class="link">
+              <span class="link-icon">🔐</span>
+              Inicia sesión aquí
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
