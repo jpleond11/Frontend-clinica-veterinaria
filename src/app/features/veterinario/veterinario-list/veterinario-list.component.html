@@ -45,6 +45,8 @@
               <th>Teléfono</th>
               <th>Email</th>
               <th>Especialidad</th>
+              <th>Usuario Creación</th>
+              <th>Usuario Edición</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -52,12 +54,12 @@
           <tbody>
             <!-- Estado de carga -->
             <tr *ngIf="loading">
-              <td colspan="6" class="text-center">Cargando...</td>
+              <td colspan="8" class="text-center">Cargando...</td>
             </tr>
 
             <!-- Sin datos -->
             <tr *ngIf="!loading && veterinarios.length === 0">
-              <td colspan="6" class="text-center">
+              <td colspan="8" class="text-center">
                 No hay veterinarios registrados
               </td>
             </tr>
@@ -79,6 +81,8 @@
               <td>{{ vet.telefono }}</td>
               <td>{{ vet.email }}</td>
               <td>{{ vet.especialidad }}</td>
+              <td>{{ vet.usuario_id_creacion || '-' }}</td>
+              <td>{{ vet.usuario_id_edicion || '-' }}</td>
               <td>
                 <button
                   class="btn btn-sm btn-primary me-2"
@@ -215,6 +219,27 @@
                   [(ngModel)]="veterinarioForm.especialidad"
                   name="especialidad"
                   required
+                />
+              </div>
+
+              <!-- Usuario Creación y Edición -->
+              <div class="col-md-6 mb-3">
+                <label>Usuario Creación *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="veterinarioForm.usuario_id_creacion"
+                  name="usuario_id_creacion"
+                />
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label>Usuario Edición</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="veterinarioForm.usuario_id_edicion"
+                  name="usuario_id_edicion"
                 />
               </div>
             </div>

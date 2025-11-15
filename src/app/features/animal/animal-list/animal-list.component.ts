@@ -28,12 +28,14 @@ export class AnimalListComponent implements OnInit {
   filtroId = '';
 
   // Formulario para crear o editar animales
-  animalForm: CreateAnimalRequest | UpdateAnimalRequest = {
+  animalForm: CreateAnimalRequest & { usuario_id_creacion?: string, usuario_id_edicion?: string } = {
     nombre_animal: '',
     especie_animal: '',
     fecha_nacimiento_animal: '',
     propietario_id: '',
     categoria_id: '',
+    usuario_id_creacion: '',
+    usuario_id_edicion: ''
   };
 
   constructor(private animalService: AnimalService) {}
@@ -97,6 +99,8 @@ export class AnimalListComponent implements OnInit {
       fecha_nacimiento_animal: '',
       propietario_id: '',
       categoria_id: '',
+      usuario_id_creacion: '',
+      usuario_id_edicion: ''
     };
     this.showModal = true;
   }
@@ -112,6 +116,8 @@ export class AnimalListComponent implements OnInit {
         : '',
       propietario_id: animal.propietario_id,
       categoria_id: animal.categoria_id,
+      usuario_id_creacion: animal.usuario_id_creacion,
+      usuario_id_edicion: ''
     };
     this.showModal = true;
   }
@@ -122,28 +128,78 @@ export class AnimalListComponent implements OnInit {
 
   /** Guardar (crear o actualizar) */
   saveAnimal(): void {
-    if (this.editingAnimal) {
-      const updateData: UpdateAnimalRequest = {
-        ...this.animalForm,
-      };
+  const {
+    nombre_animal,
+    especie_animal,
+    fecha_nacimiento_animal,
+    propietario_id,
+    categoria_id,
+    usuario_id_creacion,
+    usuario_id_edicion
+  } = this.animalForm;
 
-      this.animalService.updateAnimal(this.editingAnimal.id_animal, updateData).subscribe({
-        next: () => {
-          this.loadAnimales();
-          this.closeModal();
-        },
-        error: (err: HttpErrorResponse | any) => console.error('Error al actualizar animal:', err)
-      });
-    } else {
-      this.animalService.createAnimal(this.animalForm as CreateAnimalRequest).subscribe({
-        next: () => {
-          this.loadAnimales();
-          this.closeModal();
-        },
-        error: (err: HttpErrorResponse | any) => console.error('Error al crear animal:', err)
-      });
-    }
+  // 🔹 Validación de campos obligatorios
+  if (
+    !nombre_animal?.trim() ||
+    !especie_animal?.trim() ||
+    !fecha_nacimiento_animal?.trim() ||
+    !propietario_id?.trim() ||
+    !categoria_id?.trim()
+  ) {
+    alert('Los campos con * son obligatorios.');
+    return;
   }
+
+  if (this.editingAnimal) {
+    // 🔹 ACTUALIZAR Animal
+    const updateData: UpdateAnimalRequest = {
+      nombre_animal: nombre_animal.trim(),
+      especie_animal: especie_animal.trim(),
+      fecha_nacimiento_animal: fecha_nacimiento_animal.trim(),
+      propietario_id: propietario_id.trim(),
+      categoria_id: categoria_id.trim(),
+      usuario_id_edicion: usuario_id_edicion?.trim() || null
+    };
+
+    this.animalService.updateAnimal(this.editingAnimal.id_animal, updateData).subscribe({
+      next: () => {
+        this.loadAnimales();
+        this.closeModal();
+      },
+      error: (err) => {
+        console.error('Error al actualizar animal:', err);
+        alert('Error al actualizar el animal');
+      }
+    });
+
+  } else {
+    // 🔹 CREAR Animal
+    if (!usuario_id_creacion?.trim()) {
+      alert('El campo "Usuario Creación" es obligatorio.');
+      return;
+    }
+
+    const newAnimal: CreateAnimalRequest = {
+      nombre_animal: nombre_animal.trim(),
+      especie_animal: especie_animal.trim(),
+      fecha_nacimiento_animal: fecha_nacimiento_animal.trim(),
+      propietario_id: propietario_id.trim(),
+      categoria_id: categoria_id.trim(),
+      usuario_id_creacion: usuario_id_creacion.trim()
+    };
+
+    this.animalService.createAnimal(newAnimal).subscribe({
+      next: () => {
+        this.loadAnimales();
+        this.closeModal();
+      },
+      error: (err) => {
+        console.error('Error al crear animal:', err);
+        alert('Error al crear el animal');
+      }
+    });
+  }
+}
 
   /** Eliminar */
   deleteAnimal(animal: Animal): void {

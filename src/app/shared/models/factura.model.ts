@@ -12,7 +12,6 @@ export interface Factura {
   cita?: {
     id_cita: string;
     fecha_inicio_cita: string;
-    // Puedes incluir más campos relevantes de Cita aquí
     motivo_cita: string;
     animal?: {
       id_animal: string;
@@ -22,6 +21,8 @@ export interface Factura {
 
   fecha_creacion: string;
   fecha_actualizacion: string;
+  usuario_id_creacion: string;
+  usuario_id_edicion?: string | null; //Opcional, se usa al actualizar
 }
 
 /**
@@ -30,8 +31,9 @@ export interface Factura {
 export interface CreateFacturaRequest {
   monto_factura: number;
   descripcion_factura: string;
-  fecha_emision?: string; // Podría ser opcional si el backend la genera
+  fecha_emision?: string;
   cita_id: string;
+  usuario_id_creacion: string;
 }
 
 /**
@@ -40,8 +42,9 @@ export interface CreateFacturaRequest {
 export interface UpdateFacturaRequest {
   monto_factura?: number;
   descripcion_factura?: string;
-  fecha_emision?: string;
+  fecha_emision?: string | null;
   cita_id?: string;
+  usuario_id_edicion?: string | null;
 }
 
 /**

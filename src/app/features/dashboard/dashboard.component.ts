@@ -78,11 +78,12 @@ import { RouterModule } from '@angular/router';
       font-size: 2.5rem;
       font-weight: 800;
       margin-bottom: 0.5rem;
+      color: #003366 !important;
     }
 
     .welcome-subtitle {
       font-size: 1.125rem;
-      color: rgba(255, 255, 255, 0.95);
+      color: #003366 !important;
       margin-bottom: 0;
       font-weight: 500;
       text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
@@ -161,11 +162,11 @@ import { RouterModule } from '@angular/router';
       background: rgba(255, 255, 255, 0.15);
       border: 1px solid rgba(255, 255, 255, 0.3);
       border-radius: var(--radius-md);
-      color: white;
+      color: black !important;
       text-decoration: none;
       transition: all 0.3s ease;
       cursor: pointer;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+      text-shadow: none;
     }
 
     .action-btn:hover {
