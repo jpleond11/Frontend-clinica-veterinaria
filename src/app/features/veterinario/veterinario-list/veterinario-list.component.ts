@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { PaginationParams } from '../../../core/models/api-response.model';
+import { PaginationParams, ApiResponse } from '../../../core/models/api-response.model';
 import { VeterinarioService } from '../../../core/services/veterinario.service';
-import { Veterinario } from '../../../shared/models/veterinario.model';
+import { Veterinario, CreateVeterinarioRequest, UpdateVeterinarioRequest } from '../../../shared/models/veterinario.model';
 import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
@@ -26,14 +26,17 @@ export class VeterinarioListComponent implements OnInit {
   showModal = false;
   editingVeterinario: Veterinario | null = null;
 
-  veterinarioForm = {
+  // Formulario de creación/edición
+  veterinarioForm: CreateVeterinarioRequest & { usuario_id_creacion?: string, usuario_id_edicion?: string } = {
     primer_nombre_veterinario: '',
     segundo_nombre_veterinario: '',
     primer_apellido_veterinario: '',
     segundo_apellido_veterinario: '',
     telefono: '',
     email: '',
-    especialidad: ''
+    especialidad: '',
+    usuario_id_creacion: '',
+    usuario_id_edicion: ''
   };
 
   constructor(private veterinarioService: VeterinarioService) {}
@@ -51,7 +54,7 @@ export class VeterinarioListComponent implements OnInit {
     };
 
     this.veterinarioService.getVeterinarios(pagination).subscribe({
-      next: (response: any) => {
+      next: (response: ApiResponse<Veterinario[]>) => {
         this.veterinarios = response.data;
         this.totalPages = Math.ceil(response.data.length / this.pageSize);
         this.loading = false;
@@ -64,32 +67,33 @@ export class VeterinarioListComponent implements OnInit {
   }
 
   buscarPorId(): void {
-              const id = this.filtroId.trim();
-              if (!id) {
-                this.loadVeterinarios();
-                return;
-              }
-          
-              this.loading = true;
-              this.veterinarioService.getVeterinarioById(id).subscribe({
-                next: (veterinario: Veterinario) => {
-                  this.veterinarios = [veterinario]; // mostrar solo el encontrado
-                  this.totalPages = 1;
-                  this.loading = false;
-                },
-                error: (err: HttpErrorResponse | any) => {
-                  console.error('Error al buscar animal:', err);
-                  this.veterinarios = [];
-                  this.loading = false;
-                }
-              });
-            }
+    const id = this.filtroId.trim();
+    if (!id) {
+      this.loadVeterinarios();
+      return;
+    }
+
+    this.loading = true;
+    this.veterinarioService.getVeterinarioById(id).subscribe({
+      next: (veterinario: Veterinario) => {
+        this.veterinarios = [veterinario]; // mostrar solo el encontrado
+        this.totalPages = 1;
+        this.loading = false;
+      },
+      error: (err: HttpErrorResponse | any) => {
+        console.error('Error al buscar veterinario:', err);
+        this.veterinarios = [];
+        this.loading = false;
+      }
+    });
+  }
 
   onFilterChange(): void {
     this.loadVeterinarios();
   }
 
   clearFilters(): void {
+    this.filtroId = '';
     this.loadVeterinarios();
   }
 
@@ -110,7 +114,9 @@ export class VeterinarioListComponent implements OnInit {
       segundo_apellido_veterinario: '',
       telefono: '',
       email: '',
-      especialidad: ''
+      especialidad: '',
+      usuario_id_creacion: '',
+      usuario_id_edicion: ''
     };
     this.showModal = true;
   }
@@ -124,7 +130,9 @@ export class VeterinarioListComponent implements OnInit {
       segundo_apellido_veterinario: vet.segundo_apellido_veterinario || '',
       telefono: vet.telefono,
       email: vet.email,
-      especialidad: vet.especialidad
+      especialidad: vet.especialidad,
+      usuario_id_creacion: vet.usuario_id_creacion,
+      usuario_id_edicion: ''
     };
     this.showModal = true;
   }
@@ -135,43 +143,87 @@ export class VeterinarioListComponent implements OnInit {
   }
 
   saveVeterinario(): void {
-    const { primer_nombre_veterinario, primer_apellido_veterinario, telefono, email, especialidad } = this.veterinarioForm;
+  const {
+    primer_nombre_veterinario,
+    primer_apellido_veterinario,
+    telefono,
+    email,
+    especialidad,
+    usuario_id_creacion,
+    usuario_id_edicion
+  } = this.veterinarioForm;
 
-    if (!primer_nombre_veterinario.trim() || !primer_apellido_veterinario.trim() || !telefono.trim() || !email.trim() || !especialidad.trim()) {
-      alert('Los campos con * son obligatorios.');
-      return;
-    }
+  // Validación de campos obligatorios
+  if (
+    !primer_nombre_veterinario?.trim() ||
+    !primer_apellido_veterinario?.trim() ||
+    !telefono?.trim() ||
+    !email?.trim() ||
+    !especialidad?.trim()
+  ) {
+    alert('Los campos con * son obligatorios.');
+    return;
+  }
 
-    if (this.editingVeterinario) {
-      // Actualizar veterinario
-      const updateData = { ...this.veterinarioForm };
+  if (this.editingVeterinario) {
+    // ACTUALIZAR veterinario existente
+    const updateData: UpdateVeterinarioRequest = {
+      primer_nombre_veterinario: primer_nombre_veterinario.trim(),
+      segundo_nombre_veterinario: this.veterinarioForm.segundo_nombre_veterinario || null,
+      primer_apellido_veterinario: primer_apellido_veterinario.trim(),
+      segundo_apellido_veterinario: this.veterinarioForm.segundo_apellido_veterinario || null,
+      telefono: telefono.trim(),
+      email: email.trim(),
+      especialidad: especialidad.trim(),
+      // usuario_id_edicion es opcional, solo se incluye si tiene valor
+      ...(usuario_id_edicion?.trim()
+        ? { usuario_id_edicion: usuario_id_edicion.trim() as string | null }
+        : { usuario_id_edicion: null })
+    };
 
-      this.veterinarioService.updateVeterinario(this.editingVeterinario.id_veterinario, updateData).subscribe({
-        next: () => {
-          this.loadVeterinarios();
-          this.closeModal();
-        },
-        error: (error : any) => {
-          console.error('Error al actualizar veterinario:', error);
-          alert('Error al actualizar el veterinario');
-        }
-      });
-    } else {
-      // Crear nuevo veterinario
-      const newVeterinario = { ...this.veterinarioForm };
-
-      this.veterinarioService.createVeterinario(newVeterinario).subscribe({
+    this.veterinarioService
+      .updateVeterinario(this.editingVeterinario.id_veterinario, updateData)
+      .subscribe({
         next: () => {
           this.loadVeterinarios();
           this.closeModal();
         },
         error: (error: any) => {
-          console.error('Error al crear veterinario:', error);
-          alert('Error al crear el veterinario');
+          console.error('Error al actualizar veterinario:', error);
+          alert('Error al actualizar el veterinario');
         }
       });
+
+  } else {
+    // CREAR nuevo veterinario
+    if (!usuario_id_creacion?.trim()) {
+      alert('El campo "Usuario Creación" es obligatorio.');
+      return;
     }
+
+    const newVeterinario: CreateVeterinarioRequest = {
+      primer_nombre_veterinario: primer_nombre_veterinario.trim(),
+      segundo_nombre_veterinario: this.veterinarioForm.segundo_nombre_veterinario || null,
+      primer_apellido_veterinario: primer_apellido_veterinario.trim(),
+      segundo_apellido_veterinario: this.veterinarioForm.segundo_apellido_veterinario || null,
+      telefono: telefono.trim(),
+      email: email.trim(),
+      especialidad: especialidad.trim(),
+      usuario_id_creacion: usuario_id_creacion.trim() // ✅ obligatorio
+    };
+
+    this.veterinarioService.createVeterinario(newVeterinario).subscribe({
+      next: () => {
+        this.loadVeterinarios();
+        this.closeModal();
+      },
+      error: (error: any) => {
+        console.error('Error al crear veterinario:', error);
+        alert('Error al crear el veterinario');
+      }
+    });
   }
+}
 
   deleteVeterinario(vet: Veterinario): void {
     if (confirm(`¿Está seguro de eliminar al veterinario "${vet.primer_nombre_veterinario} ${vet.primer_apellido_veterinario}"?`)) {

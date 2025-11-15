@@ -13,6 +13,8 @@ export interface Veterinario {
 
   fecha_creacion: string;
   fecha_actualizacion: string;
+  usuario_id_creacion: string;
+  usuario_id_edicion?: string | null; //Opcional, se usa al actualizar
 }
 
 /**
@@ -26,6 +28,7 @@ export interface CreateVeterinarioRequest {
   telefono: string;
   email: string;
   especialidad: string;
+  usuario_id_creacion: string;
 }
 
 /**
@@ -39,6 +42,7 @@ export interface UpdateVeterinarioRequest {
   telefono?: string;
   email?: string;
   especialidad?: string;
+  usuario_id_edicion: string | null;
 }
 
 /**

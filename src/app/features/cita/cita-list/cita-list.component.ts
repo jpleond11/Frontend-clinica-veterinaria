@@ -26,13 +26,15 @@ export class CitaListComponent implements OnInit {
 
   filtroId = '';
 
-  citaForm: CreateCitaRequest | UpdateCitaRequest = {
+  citaForm: CreateCitaRequest & { usuario_id_creacion?: string, usuario_id_edicion?: string } = {
     fecha_inicio_cita: '',
     fecha_final_cita: '',
     motivo_cita: '',
     animal_id: '',
     vacuna_id: undefined,
-    veterinario_id: ''
+    veterinario_id: '',
+    usuario_id_creacion: '',
+    usuario_id_edicion: ''
   };
 
   constructor(
@@ -97,7 +99,9 @@ export class CitaListComponent implements OnInit {
       motivo_cita: '',
       animal_id: '',
       vacuna_id: undefined,
-      veterinario_id: ''
+      veterinario_id: '',
+      usuario_id_creacion: '',
+      usuario_id_edicion: ''
     };
     this.showModal = true;
   }
@@ -110,7 +114,9 @@ export class CitaListComponent implements OnInit {
       motivo_cita: cita.motivo_cita,
       animal_id: cita.animal_id,
       vacuna_id: cita.vacuna_id || undefined,
-      veterinario_id: cita.veterinario_id
+      veterinario_id: cita.veterinario_id,
+      usuario_id_creacion: cita.usuario_id_creacion,
+      usuario_id_edicion: ''
     };
     this.showModal = true;
   }
@@ -120,34 +126,82 @@ export class CitaListComponent implements OnInit {
   }
 
   saveCita(): void {
-    const data: CreateCitaRequest | UpdateCitaRequest = {
-      fecha_inicio_cita: this.citaForm.fecha_inicio_cita,
-      fecha_final_cita: this.citaForm.fecha_final_cita,
-      motivo_cita: this.citaForm.motivo_cita,
-      animal_id: this.citaForm.animal_id,
-      vacuna_id: this.citaForm.vacuna_id || undefined,
-      veterinario_id: this.citaForm.veterinario_id
+  const {
+    fecha_inicio_cita,
+    fecha_final_cita,
+    motivo_cita,
+    animal_id,
+    vacuna_id,
+    veterinario_id,
+    usuario_id_creacion,
+    usuario_id_edicion
+  } = this.citaForm;
+
+  // 🔹 Validación de campos obligatorios
+  if (
+    !fecha_inicio_cita?.trim() ||
+    !fecha_final_cita?.trim() ||
+    !motivo_cita?.trim() ||
+    !animal_id?.trim() ||
+    !veterinario_id?.trim()
+  ) {
+    alert('Los campos con * son obligatorios.');
+    return;
+  }
+
+  if (this.editingCita) {
+    // 🔹 ACTUALIZAR Cita
+    const updateData: UpdateCitaRequest = {
+      fecha_inicio_cita: fecha_inicio_cita.trim(),
+      fecha_final_cita: fecha_final_cita.trim(),
+      motivo_cita: motivo_cita.trim(),
+      animal_id: animal_id.trim(),
+      vacuna_id: vacuna_id?.trim() || undefined,
+      veterinario_id: veterinario_id.trim(),
+      usuario_id_edicion: usuario_id_edicion?.trim() || null
     };
 
-    if (this.editingCita) {
-      const updateData: UpdateCitaRequest = Object.keys(data).reduce((acc, key) => {
-        const value = data[key as keyof typeof data];
-        if (value !== undefined && value !== null && value !== '') {
-          (acc as any)[key] = value;
-        }
-        return acc;
-      }, {});
-      this.citaService.updateCita(this.editingCita.id_cita, updateData).subscribe({
-        next: () => { this.loadCitas(); this.closeModal(); },
-        error: (err: HttpErrorResponse | any) => console.error('Error al actualizar cita:', err)
-      });
-    } else {
-      this.citaService.createCita(data as CreateCitaRequest).subscribe({
-        next: () => { this.loadCitas(); this.closeModal(); },
-        error: (err: HttpErrorResponse | any) => console.error('Error al crear cita:', err)
-      });
+    this.citaService.updateCita(this.editingCita.id_cita, updateData).subscribe({
+      next: () => {
+        this.loadCitas();
+        this.closeModal();
+      },
+      error: (error: any) => {
+        console.error('Error al actualizar cita:', error);
+        alert('Error al actualizar la cita');
+      }
+    });
+
+  } else {
+    // 🔹 CREAR Cita
+    if (!usuario_id_creacion?.trim()) {
+      alert('El campo "Usuario Creación" es obligatorio.');
+      return;
     }
+
+    const newCita: CreateCitaRequest = {
+      fecha_inicio_cita: fecha_inicio_cita.trim(),
+      fecha_final_cita: fecha_final_cita.trim(),
+      motivo_cita: motivo_cita.trim(),
+      animal_id: animal_id.trim(),
+      vacuna_id: vacuna_id?.trim() || undefined,
+      veterinario_id: veterinario_id.trim(),
+      usuario_id_creacion: usuario_id_creacion.trim()
+    };
+
+    this.citaService.createCita(newCita).subscribe({
+      next: () => {
+        this.loadCitas();
+        this.closeModal();
+      },
+      error: (error: any) => {
+        console.error('Error al crear cita:', error);
+        alert('Error al crear la cita');
+      }
+    });
   }
+}
+
 
   deleteCita(cita: Cita): void {
     if (confirm(`¿Eliminar cita "${cita.motivo_cita}"?`)) {

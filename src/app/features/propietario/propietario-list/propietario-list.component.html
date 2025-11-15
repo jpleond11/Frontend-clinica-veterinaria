@@ -1,5 +1,6 @@
 <div class="propietario-list-container">
   <div class="card">
+    <!-- Encabezado -->
     <div class="card-header d-flex justify-content-between align-items-center">
       <h2 class="card-title">Gestión de Propietarios</h2>
       <button class="btn btn-primary" (click)="openCreateModal()">
@@ -11,20 +12,22 @@
       <!-- Filtro por ID -->
       <div class="filters mb-3">
         <div class="row align-items-center">
-          <div class="col-md-4">
+          <div class="col-md-4 mb-2">
             <input
               type="text"
               class="form-control"
-              placeholder="Buscar por ID..."
+              placeholder="Buscar por ID de propietario"
               [(ngModel)]="filtroId"
             />
           </div>
-          <div class="col-md-2">
+
+          <div class="col-md-2 mb-2">
             <button class="btn btn-primary w-100" (click)="buscarPorId()">
               Buscar
             </button>
           </div>
-          <div class="col-md-2">
+
+          <div class="col-md-2 mb-2">
             <button class="btn btn-secondary w-100" (click)="clearFilters()">
               Limpiar
             </button>
@@ -32,7 +35,7 @@
         </div>
       </div>
 
-      <!-- Tabla de propietarios -->
+      <!-- 📋 Tabla de Propietarios -->
       <div class="table-responsive">
         <table class="table table-striped table-hover">
           <thead class="table-light">
@@ -44,31 +47,38 @@
               <th>Segundo Apellido</th>
               <th>Teléfono</th>
               <th>Dirección</th>
-              <th>Fecha Creación</th>
               <th>Acciones</th>
             </tr>
           </thead>
 
           <tbody>
+            <!-- Estado de carga -->
             <tr *ngIf="loading">
-              <td colspan="9" class="text-center">Cargando...</td>
+              <td colspan="8" class="text-center">Cargando...</td>
             </tr>
 
+            <!-- Sin datos -->
             <tr *ngIf="!loading && propietarios.length === 0">
-              <td colspan="9" class="text-center">
+              <td colspan="8" class="text-center">
                 No hay propietarios registrados
               </td>
             </tr>
 
-            <tr *ngFor="let propietario of propietarios">
+            <!-- Datos -->
+            <tr
+              *ngFor="
+                let propietario of propietarios
+                  | slice: (currentPage - 1) * pageSize : currentPage * pageSize
+              "
+            >
               <td>{{ propietario.id_propietario }}</td>
               <td>{{ propietario.primer_nombre_propietario }}</td>
               <td>{{ propietario.segundo_nombre_propietario || '-' }}</td>
               <td>{{ propietario.primer_apellido_propietario }}</td>
-              <td>{{ propietario.segundo_apellido_propietario || '-' }}</td>
+              <td>{{ propietario.segundo_apellido_propietario }}</td>
               <td>{{ propietario.telefono }}</td>
               <td>{{ propietario.direccion }}</td>
-              <td>{{ propietario.fecha_creacion | date: 'short' }}</td>
+
               <td>
                 <button
                   class="btn btn-sm btn-primary me-2"
@@ -76,6 +86,7 @@
                 >
                   Editar
                 </button>
+
                 <button
                   class="btn btn-sm btn-danger"
                   (click)="deletePropietario(propietario)"
@@ -97,7 +108,9 @@
         >
           Anterior
         </button>
+
         <span class="mx-3">Página {{ currentPage }} de {{ totalPages }}</span>
+
         <button
           class="btn btn-secondary"
           [disabled]="currentPage === totalPages"
@@ -109,7 +122,7 @@
     </div>
   </div>
 
-  <!-- Modal para crear/editar propietario -->
+  <!-- Modal Crear/Editar Propietario -->
   <div
     class="modal fade"
     [class.show]="showModal"
@@ -119,18 +132,25 @@
   >
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
+        <!-- Header -->
         <div class="modal-header">
           <h5 class="modal-title">
-            {{ editingPropietario ? 'Editar Propietario' : 'Registrar Nuevo Propietario' }}
+            {{
+              editingPropietario
+                ? 'Editar Propietario'
+                : 'Registrar Nuevo Propietario'
+            }}
           </h5>
           <button type="button" class="close" (click)="closeModal()">
             <span>&times;</span>
           </button>
         </div>
 
+        <!-- Body -->
         <div class="modal-body">
           <form (ngSubmit)="savePropietario()">
             <div class="row">
+              <!-- Primer Nombre -->
               <div class="col-md-6 mb-3">
                 <label>Primer Nombre *</label>
                 <input
@@ -142,6 +162,7 @@
                 />
               </div>
 
+              <!-- Segundo Nombre -->
               <div class="col-md-6 mb-3">
                 <label>Segundo Nombre</label>
                 <input
@@ -152,6 +173,7 @@
                 />
               </div>
 
+              <!-- Primer Apellido -->
               <div class="col-md-6 mb-3">
                 <label>Primer Apellido *</label>
                 <input
@@ -163,16 +185,19 @@
                 />
               </div>
 
+              <!-- Segundo Apellido -->
               <div class="col-md-6 mb-3">
-                <label>Segundo Apellido</label>
+                <label>Segundo Apellido *</label>
                 <input
                   type="text"
                   class="form-control"
                   [(ngModel)]="propietarioForm.segundo_apellido_propietario"
                   name="segundo_apellido_propietario"
+                  required
                 />
               </div>
 
+              <!-- Teléfono -->
               <div class="col-md-6 mb-3">
                 <label>Teléfono *</label>
                 <input
@@ -184,6 +209,7 @@
                 />
               </div>
 
+              <!-- Dirección -->
               <div class="col-md-6 mb-3">
                 <label>Dirección *</label>
                 <input
@@ -194,14 +220,39 @@
                   required
                 />
               </div>
+
+              <!-- Usuario Creación -->
+              <div class="col-md-6 mb-3">
+                <label>Usuario Creación *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="propietarioForm.usuario_id_creacion"
+                  name="usuario_id_creacion"
+                  [readonly]="!!editingPropietario"
+                />
+              </div>
+
+              <!-- Usuario Edición -->
+              <div class="col-md-6 mb-3">
+                <label>Usuario Edición</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="propietarioForm.usuario_id_edicion"
+                  name="usuario_id_edicion"
+                />
+              </div>
             </div>
           </form>
         </div>
 
+        <!-- Footer -->
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" (click)="closeModal()">
             Cancelar
           </button>
+
           <button type="button" class="btn btn-primary" (click)="savePropietario()">
             {{ editingPropietario ? 'Actualizar' : 'Registrar' }}
           </button>

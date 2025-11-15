@@ -27,6 +27,8 @@ export interface Cita {
 
   fecha_creacion: string;
   fecha_actualizacion: string;
+  usuario_id_creacion: string;
+  usuario_id_edicion?: string | null; //Opcional, se usa al actualizar
 }
 
 /**
@@ -52,6 +54,7 @@ export interface UpdateCitaRequest {
   animal_id?: string;
   vacuna_id?: string;
   veterinario_id?: string;
+  usuario_id_edicion?: string | null;
 }
 
 /**
