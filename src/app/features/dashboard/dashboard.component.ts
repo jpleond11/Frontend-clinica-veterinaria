@@ -1,6 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { Chart, registerables } from 'chart.js';
+import { CitaService } from 'src/app/core/services/cita.service';
+Chart.register(...registerables);
 
 @Component({
   selector: 'app-dashboard',
@@ -17,6 +20,18 @@ import { RouterModule } from '@angular/router';
             <p class="welcome-subtitle text-high-contrast">
               Plataforma integral para la gestión de animales, citas, facturas y más.
             </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart Section -->
+      <div class="chart-section slide-in-up">
+        <div class="card glass chart-card">
+          <div class="card-header text-center">
+            <h3 class="card-title">Citas de los Últimos 3 Meses</h3>
+          </div>
+          <div class="card-body">
+            <canvas #chartCanvas></canvas>
           </div>
         </div>
       </div>
@@ -61,11 +76,33 @@ import { RouterModule } from '@angular/router';
   `,
   styles: [`
     .dashboard {
-      padding: 2rem 0;
+      padding: 1.25rem 0 !important;
+      max-width: 1100px;      
+      margin: 0 auto;
+      transform: scale(0.95);
     }
 
+    .chart-card {
+      max-width: 750px;
+      margin: 0 auto;
+      padding: 1.5rem !important;
+    }
+
+    .chart-section {
+      margin-bottom: 3rem !important;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .chart-card canvas {
+      height: 260px !important;  
+    }
+
+
     .welcome-section {
-      margin-bottom: 3rem;
+      margin-top: -3rem;
+      margin-bottom: 2rem;
     }
 
     .welcome-icon {
@@ -91,26 +128,31 @@ import { RouterModule } from '@angular/router';
 
     .modules-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(4, 1fr);
       gap: 2rem;
       margin-bottom: 3rem;
+      justify-items: center;
     }
 
     .module-card {
       transition: transform 0.3s ease;
+      width: 100%;
+      max-width: 330px;
+      min-height: 360px;
+      display: flex;
     }
 
     .module-card:hover {
-      transform: translateY(-5px);
+      transform: translateY(-6px);
     }
 
     .module-icon {
-      font-size: 3rem;
+      font-size: 3.5rem;
       margin-bottom: 1rem;
     }
 
     .module-title {
-      font-size: 1.5rem;
+      font-size: 1.7rem;
       font-weight: 700;
       margin-bottom: 1rem;
       color: var(--dark-color);
@@ -121,6 +163,7 @@ import { RouterModule } from '@angular/router';
       margin-bottom: 1.5rem;
       line-height: 1.6;
       font-weight: 500;
+      font-size: 1rem;
     }
 
     .module-features {
@@ -162,7 +205,7 @@ import { RouterModule } from '@angular/router';
       background: rgba(255, 255, 255, 0.15);
       border: 1px solid rgba(255, 255, 255, 0.3);
       border-radius: var(--radius-md);
-      color: black !important;
+      color: black;
       text-decoration: none;
       transition: all 0.3s ease;
       cursor: pointer;
@@ -203,7 +246,11 @@ import { RouterModule } from '@angular/router';
     }
   `]
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, AfterViewInit {
+  @ViewChild('chartCanvas') chartCanvas!: ElementRef<HTMLCanvasElement>;
+  private chart!: Chart;
+
+  constructor(private citaService: CitaService) {}
   modulos = [
     {
       titulo: 'Animales',
@@ -279,5 +326,103 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     console.log('Dashboard cargado');
+  }
+
+  ngAfterViewInit(): void {
+    this.loadChartData();
+  }
+
+  /** ===============================
+   *  1) Traer datos del backend
+   *  =============================== */
+  private loadChartData(): void {
+    this.citaService.getCitasUltimos3Meses().subscribe({
+      next: (citas) => {
+        const grouped = this.groupByMonth(citas);
+        this.renderChart(grouped.labels, grouped.values);
+      },
+      error: (err) => {
+        console.error('Error cargando citas:', err);
+      }
+    });
+  }
+
+  /** ===============================
+   *  2) Agrupar citas por mes
+   *  =============================== */
+  private groupByMonth(citas: any[]) {
+    const map = new Map<string, number>();
+
+    citas.forEach(cita => {
+      const fecha = new Date(cita.fecha_inicio_cita);
+      const key = fecha.toLocaleString('es-CO', {
+        month: 'long',
+        year: 'numeric'
+      });
+
+      map.set(key, (map.get(key) || 0) + 1);
+    });
+
+    const labels = Array.from(map.keys());
+    const values = Array.from(map.values());
+
+    return { labels, values };
+  }
+
+  /** ===============================
+   *  3) Renderizar gráfico final
+   *  =============================== */
+  private renderChart(labels: string[], values: number[]): void {
+    const ctx = this.chartCanvas.nativeElement.getContext('2d');
+    if (!ctx) return;
+
+    // Si ya existe un gráfico previo, destruirlo
+    if (this.chart) {
+      this.chart.destroy();
+    }
+
+    this.chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Citas Registradas',
+          data: values,
+          borderColor: '#003366',
+          backgroundColor: 'rgba(0, 51, 102, 0.2)',
+          borderWidth: 3,
+          tension: 0.4,
+          fill: true,
+          pointRadius: 6,
+          pointBackgroundColor: '#003366',
+          pointHoverRadius: 10
+        }]
+      },
+      options: {
+        responsive: true,
+        animation: {
+          duration: 1500,
+          easing: 'easeInOutQuart'
+        },
+        plugins: {
+          legend: {
+            labels: {
+              color: '#003366',
+              font: { weight: 'bold' }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { color: '#003366', font: { weight: 600 } }
+          },
+          y: {
+            beginAtZero: true,
+            ticks: { color: '#003366' }
+          }
+        }
+      }
+    });
   }
 }

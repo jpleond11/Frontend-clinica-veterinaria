@@ -53,7 +53,11 @@
           <tbody>
             <!-- Estado de carga -->
             <tr *ngIf="loading">
+<<<<<<< HEAD
               <td colspan="7" class="text-center">Cargando...</td>
+=======
+              <td colspan="6" class="text-center">Cargando...</td>
+>>>>>>> origin/Prod
             </tr>
 
             <!-- Sin datos -->
@@ -86,7 +90,6 @@
                 >
                   Editar
                 </button>
-
                 <button
                   class="btn btn-sm btn-danger"
                   (click)="deleteVacuna(vacuna)"
@@ -212,7 +215,6 @@
           <button type="button" class="btn btn-secondary" (click)="closeModal()">
             Cancelar
           </button>
-
           <button type="button" class="btn btn-primary" (click)="saveVacuna()">
             {{ editingVacuna ? 'Actualizar' : 'Registrar' }}
           </button>
