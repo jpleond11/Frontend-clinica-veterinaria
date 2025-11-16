@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { PaginationParams, ApiResponse } from '../../../core/models/api-response.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FacturaService } from '../../../core/services/factura.service';
-import { Factura } from '../../../shared/models/factura.model';
+import { Factura, CreateFacturaRequest, UpdateFacturaRequest } from '../../../shared/models/factura.model';
 
 @Component({
   selector: 'app-factura-list',
@@ -26,11 +26,13 @@ export class FacturaListComponent implements OnInit {
   showModal = false;
   editingFactura: Factura | null = null;
 
-  facturaForm = {
-    monto_factura: '',
+  facturaForm: CreateFacturaRequest & { usuario_id_creacion?: string, usuario_id_edicion?: string } = {
+    monto_factura: 0,
     descripcion_factura: '',
     fecha_emision: '',
-    cita_id: ''
+    cita_id: '',
+    usuario_id_creacion: '',
+    usuario_id_edicion: ''
   };
 
   constructor(
@@ -100,10 +102,12 @@ export class FacturaListComponent implements OnInit {
   openCreateModal(): void {
     this.editingFactura = null;
     this.facturaForm = {
-      monto_factura: '',
+      monto_factura: 0,
       descripcion_factura: '',
       fecha_emision: '',
-      cita_id: ''
+      cita_id: '',
+      usuario_id_creacion: '',
+      usuario_id_edicion: ''
     };
     this.showModal = true;
   }
@@ -111,10 +115,12 @@ export class FacturaListComponent implements OnInit {
   editFactura(factura: Factura): void {
     this.editingFactura = factura;
     this.facturaForm = {
-      monto_factura: factura.monto_factura.toString(),
+      monto_factura: factura.monto_factura,
       descripcion_factura: factura.descripcion_factura,
       fecha_emision: factura.fecha_emision?.split('T')[0] || '',
-      cita_id: factura.cita_id
+      cita_id: factura.cita_id,
+      usuario_id_creacion: factura.usuario_id_creacion,
+      usuario_id_edicion: ''
     };
     this.showModal = true;
   }
@@ -124,24 +130,46 @@ export class FacturaListComponent implements OnInit {
   }
 
   saveFactura(): void {
-    if (
-      !this.facturaForm.monto_factura.trim() ||
-      !this.facturaForm.descripcion_factura.trim() ||
-      !this.facturaForm.cita_id
-    ) {
-      alert('Todos los campos obligatorios deben completarse.');
-      return;
-    }
+  const {
+    monto_factura,
+    descripcion_factura,
+    fecha_emision,
+    cita_id,
+    usuario_id_creacion,
+    usuario_id_edicion
+  } = this.facturaForm;
 
-    const facturaData = {
-      monto_factura: parseFloat(this.facturaForm.monto_factura),
-      descripcion_factura: this.facturaForm.descripcion_factura,
-      fecha_emision: this.facturaForm.fecha_emision,
-      cita_id: this.facturaForm.cita_id
+  // Validación
+  if (
+    monto_factura === undefined || monto_factura === null || // permite number o string
+    (!descripcion_factura?.trim()) ||
+    !cita_id?.trim()
+  ) {
+    alert('Los campos con * son obligatorios.');
+    return;
+  }
+
+  // Normalizar monto: si viene string => parseFloat, si viene number => usarlo
+  const parsedMonto: number = typeof monto_factura === 'string'
+    ? parseFloat(monto_factura)
+    : Number(monto_factura);
+
+  // Normalizar fecha_emision: enviar undefined si está vacía
+  const fechaEmisionNormalized: string | undefined = fecha_emision?.trim() || undefined;
+
+  if (this.editingFactura) {
+    const updateData: UpdateFacturaRequest = {
+      monto_factura: parsedMonto,
+      descripcion_factura: descripcion_factura.trim(),
+      fecha_emision: fechaEmisionNormalized,
+      cita_id: cita_id.trim(),
+      // usuario_id_edicion es opcional; tu interfaz permite string | null
+      usuario_id_edicion: usuario_id_edicion?.trim() || null
     };
 
-    if (this.editingFactura) {
-      this.facturaService.updateFactura(this.editingFactura.id_factura, facturaData).subscribe({
+    this.facturaService
+      .updateFactura(this.editingFactura.id_factura, updateData)
+      .subscribe({
         next: () => {
           this.loadFacturas();
           this.closeModal();
@@ -151,19 +179,34 @@ export class FacturaListComponent implements OnInit {
           alert('Error al actualizar la factura');
         }
       });
-    } else {
-      this.facturaService.createFactura(facturaData).subscribe({
-        next: () => {
-          this.loadFacturas();
-          this.closeModal();
-        },
-        error: (error:any) => {
-          console.error('Error al crear factura:', error);
-          alert('Error al crear la factura');
-        }
-      });
+
+  } else {
+    if (!usuario_id_creacion?.trim()) {
+      alert('El campo "Usuario Creación" es obligatorio.');
+      return;
     }
+
+    const newFactura: CreateFacturaRequest = {
+      monto_factura: parsedMonto,
+      descripcion_factura: descripcion_factura.trim(),
+      fecha_emision: fechaEmisionNormalized, // CreateFacturaRequest acepta fecha_emision?: string
+      cita_id: cita_id.trim(),
+      usuario_id_creacion: usuario_id_creacion.trim()
+    };
+
+    this.facturaService.createFactura(newFactura).subscribe({
+      next: () => {
+        this.loadFacturas();
+        this.closeModal();
+      },
+      error: (error: any) => {
+        console.error('Error al crear factura:', error);
+        alert('Error al crear la factura');
+      }
+    });
   }
+}
+
 
   deleteFactura(factura: Factura): void {
   const fecha = new Date(factura.fecha_emision).toLocaleDateString();

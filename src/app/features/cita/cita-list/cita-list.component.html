@@ -9,25 +9,25 @@
     </div>
 
     <div class="card-body">
-      <!-- Filtro por ID de cita -->
+      <!-- Filtro por ID -->
       <div class="filters mb-3">
         <div class="row align-items-center">
-          <div class="col-md-4">
+          <div class="col-md-4 mb-2">
             <input
               type="text"
               class="form-control"
-              placeholder="Buscar por ID de cita (UUID)"
+              placeholder="Buscar por ID de cita"
               [(ngModel)]="filtroId"
             />
           </div>
 
-          <div class="col-md-2">
+          <div class="col-md-2 mb-2">
             <button class="btn btn-primary w-100" (click)="buscarPorId()">
               Buscar
             </button>
           </div>
 
-          <div class="col-md-2">
+          <div class="col-md-2 mb-2">
             <button class="btn btn-secondary w-100" (click)="clearFilters()">
               Limpiar
             </button>
@@ -35,18 +35,18 @@
         </div>
       </div>
 
-      <!-- 📋 Tabla -->
+      <!-- 📋 Tabla de Citas -->
       <div class="table-responsive">
-        <table class="table">
-          <thead>
+        <table class="table table-striped table-hover">
+          <thead class="table-light">
             <tr>
               <th>ID</th>
               <th>Fecha Inicio</th>
               <th>Fecha Final</th>
               <th>Motivo</th>
-              <th>Animal ID</th>
-              <th>Vacuna ID</th>
-              <th>Veterinario ID</th>
+              <th>ID Animal</th>
+              <th>ID Vacuna</th>
+              <th>ID Veterinario</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -59,7 +59,9 @@
 
             <!-- Sin datos -->
             <tr *ngIf="!loading && citas.length === 0">
-              <td colspan="8" class="text-center">No hay citas registradas</td>
+              <td colspan="8" class="text-center">
+                No hay citas registradas
+              </td>
             </tr>
 
             <!-- Datos -->
@@ -70,15 +72,16 @@
               "
             >
               <td>{{ cita.id_cita }}</td>
-              <td>{{ cita.fecha_inicio_cita | date: 'yyyy-MM-dd HH:mm' }}</td>
-              <td>{{ cita.fecha_final_cita | date: 'yyyy-MM-dd HH:mm' }}</td>
+              <td>{{ cita.fecha_inicio_cita }}</td>
+              <td>{{ cita.fecha_final_cita }}</td>
               <td>{{ cita.motivo_cita }}</td>
               <td>{{ cita.animal_id }}</td>
               <td>{{ cita.vacuna_id || '-' }}</td>
               <td>{{ cita.veterinario_id }}</td>
+
               <td>
                 <button
-                  class="btn btn-sm btn-primary"
+                  class="btn btn-sm btn-primary me-2"
                   (click)="editCita(cita)"
                 >
                   Editar
@@ -95,8 +98,8 @@
         </table>
       </div>
 
-      <!-- 📄 Paginación -->
-      <div class="pagination mt-3" *ngIf="totalPages > 1">
+      <!-- Paginación -->
+      <div class="pagination mt-3 text-center" *ngIf="totalPages > 1">
         <button
           class="btn btn-secondary"
           [disabled]="currentPage === 1"
@@ -104,7 +107,9 @@
         >
           Anterior
         </button>
+
         <span class="mx-3">Página {{ currentPage }} de {{ totalPages }}</span>
+
         <button
           class="btn btn-secondary"
           [disabled]="currentPage === totalPages"
@@ -116,7 +121,7 @@
     </div>
   </div>
 
-  <!-- 🪟 Modal para crear/editar cita -->
+  <!-- Modal Crear/Editar Cita -->
   <div
     class="modal fade"
     [class.show]="showModal"
@@ -140,81 +145,99 @@
         <div class="modal-body">
           <form (ngSubmit)="saveCita()">
             <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label for="fecha_inicio_cita">Fecha Inicio *</label>
-                  <input
-                    type="datetime-local"
-                    class="form-control"
-                    id="fecha_inicio_cita"
-                    [(ngModel)]="citaForm.fecha_inicio_cita"
-                    name="fecha_inicio_cita"
-                    required
-                  />
-                </div>
+              <!-- Fecha Inicio -->
+              <div class="col-md-6 mb-3">
+                <label>Fecha Inicio *</label>
+                <input
+                  type="datetime-local"
+                  class="form-control"
+                  [(ngModel)]="citaForm.fecha_inicio_cita"
+                  name="fecha_inicio_cita"
+                  required
+                />
               </div>
 
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label for="fecha_final_cita">Fecha Final *</label>
-                  <input
-                    type="datetime-local"
-                    class="form-control"
-                    id="fecha_final_cita"
-                    [(ngModel)]="citaForm.fecha_final_cita"
-                    name="fecha_final_cita"
-                    required
-                  />
-                </div>
+              <!-- Fecha Final -->
+              <div class="col-md-6 mb-3">
+                <label>Fecha Final *</label>
+                <input
+                  type="datetime-local"
+                  class="form-control"
+                  [(ngModel)]="citaForm.fecha_final_cita"
+                  name="fecha_final_cita"
+                  required
+                />
               </div>
-            </div>
 
-            <div class="form-group">
-              <label for="motivo_cita">Motivo *</label>
-              <input
-                type="text"
-                class="form-control"
-                id="motivo_cita"
-                [(ngModel)]="citaForm.motivo_cita"
-                name="motivo_cita"
-                required
-                placeholder="Ejemplo: Vacunación, Consulta..."
-              />
-            </div>
+              <!-- Motivo -->
+              <div class="col-md-12 mb-3">
+                <label>Motivo *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="citaForm.motivo_cita"
+                  name="motivo_cita"
+                  required
+                />
+              </div>
 
-            <div class="form-group">
-              <label for="animal_id">Animal ID *</label>
-              <input
-                type="text"
-                class="form-control"
-                id="animal_id"
-                [(ngModel)]="citaForm.animal_id"
-                name="animal_id"
-                required
-              />
-            </div>
+              <!-- Animal -->
+              <div class="col-md-6 mb-3">
+                <label>ID Animal *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="citaForm.animal_id"
+                  name="animal_id"
+                  required
+                />
+              </div>
 
-            <div class="form-group">
-              <label for="vacuna_id">Vacuna ID</label>
-              <input
-                type="text"
-                class="form-control"
-                id="vacuna_id"
-                [(ngModel)]="citaForm.vacuna_id"
-                name="vacuna_id"
-              />
-            </div>
+              <!-- Vacuna -->
+              <div class="col-md-6 mb-3">
+                <label>ID Vacuna</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="citaForm.vacuna_id"
+                  name="vacuna_id"
+                />
+              </div>
 
-            <div class="form-group">
-              <label for="veterinario_id">Veterinario ID *</label>
-              <input
-                type="text"
-                class="form-control"
-                id="veterinario_id"
-                [(ngModel)]="citaForm.veterinario_id"
-                name="veterinario_id"
-                required
-              />
+              <!-- Veterinario -->
+              <div class="col-md-12 mb-3">
+                <label>ID Veterinario *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="citaForm.veterinario_id"
+                  name="veterinario_id"
+                  required
+                />
+              </div>
+
+              <!-- Usuario Creación -->
+              <div class="col-md-6 mb-3">
+                <label>Usuario Creación *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="citaForm.usuario_id_creacion"
+                  name="usuario_id_creacion"
+                  [readonly]="!!editingCita"
+                />
+              </div>
+
+              <!-- Usuario Edición -->
+              <div class="col-md-6 mb-3">
+                <label>Usuario Edición</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="citaForm.usuario_id_edicion"
+                  name="usuario_id_edicion"
+                />
+              </div>
             </div>
           </form>
         </div>

@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { PaginationParams, ApiResponse } from '../../../core/models/api-response.model';
 import { PropietarioService } from '../../../core/services/propietario.service';
-import { Propietario } from '../../../shared/models/propietario.model';
+import { Propietario, CreatePropietarioRequest, UpdatePropietarioRequest } from '../../../shared/models/propietario.model';
 import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
@@ -27,13 +27,15 @@ export class PropietarioListComponent implements OnInit {
   showModal = false;
   editingPropietario: Propietario | null = null;
 
-  propietarioForm = {
+  propietarioForm: CreatePropietarioRequest & { usuario_id_creacion?: string, usuario_id_edicion?: string } = {
     primer_nombre_propietario: '',
     segundo_nombre_propietario: '',
     primer_apellido_propietario: '',
     segundo_apellido_propietario: '',
     telefono: '',
-    direccion: ''
+    direccion: '',
+    usuario_id_creacion: '',
+    usuario_id_edicion: ''
   };
 
   constructor(private propietarioService: PropietarioService) {}
@@ -111,7 +113,9 @@ buscarPorId(): void {
       primer_apellido_propietario: '',
       segundo_apellido_propietario: '',
       telefono: '',
-      direccion: ''
+      direccion: '',
+      usuario_id_creacion: '',
+      usuario_id_edicion: ''
     };
     this.showModal = true;
   }
@@ -124,7 +128,9 @@ buscarPorId(): void {
       primer_apellido_propietario: propietario.primer_apellido_propietario,
       segundo_apellido_propietario: propietario.segundo_apellido_propietario,
       telefono: propietario.telefono,
-      direccion: propietario.direccion
+      direccion: propietario.direccion,
+      usuario_id_creacion: propietario.usuario_id_creacion,
+      usuario_id_edicion: ''
     };
     this.showModal = true;
   }
@@ -136,31 +142,45 @@ buscarPorId(): void {
 
   // Guardar (crear o actualizar)
   savePropietario(): void {
-    const form = this.propietarioForm;
+  const {
+    primer_nombre_propietario,
+    segundo_nombre_propietario,
+    primer_apellido_propietario,
+    segundo_apellido_propietario,
+    telefono,
+    direccion,
+    usuario_id_creacion,
+    usuario_id_edicion
+  } = this.propietarioForm;
 
-    if (
-      !form.primer_nombre_propietario.trim() ||
-      !form.primer_apellido_propietario.trim() ||
-      !form.segundo_apellido_propietario.trim() ||
-      !form.telefono.trim() ||
-      !form.direccion.trim()
-    ) {
-      alert('Todos los campos obligatorios deben estar completos.');
-      return;
-    }
+  // Validación de campos obligatorios
+  if (
+    !primer_nombre_propietario?.trim() ||
+    !primer_apellido_propietario?.trim() ||
+    !segundo_apellido_propietario?.trim() ||
+    !telefono?.trim() ||
+    !direccion?.trim()
+  ) {
+    alert('Los campos con * son obligatorios.');
+    return;
+  }
 
-    if (this.editingPropietario) {
-      // Actualizar propietario
-      const updateData = {
-        primer_nombre_propietario: form.primer_nombre_propietario,
-        segundo_nombre_propietario: form.segundo_nombre_propietario || null,
-        primer_apellido_propietario: form.primer_apellido_propietario,
-        segundo_apellido_propietario: form.segundo_apellido_propietario,
-        telefono: form.telefono,
-        direccion: form.direccion
-      };
+  if (this.editingPropietario) {
+    // 🔹 ACTUALIZAR propietario
+    const updateData: UpdatePropietarioRequest = {
+      primer_nombre_propietario: primer_nombre_propietario.trim(),
+      segundo_nombre_propietario: segundo_nombre_propietario?.trim() || null,
+      primer_apellido_propietario: primer_apellido_propietario.trim(),
+      segundo_apellido_propietario: segundo_apellido_propietario.trim(),
+      telefono: telefono.trim(),
+      direccion: direccion.trim(),
+      // usuario_id_edicion es opcional
+      usuario_id_edicion: usuario_id_edicion?.trim() || null
+    };
 
-      this.propietarioService.updatePropietario(this.editingPropietario.id_propietario, updateData).subscribe({
+    this.propietarioService
+      .updatePropietario(this.editingPropietario.id_propietario, updateData)
+      .subscribe({
         next: () => {
           this.loadPropietarios();
           this.closeModal();
@@ -170,29 +190,37 @@ buscarPorId(): void {
           alert('Error al actualizar el propietario');
         }
       });
-    } else {
-      // Crear nuevo propietario
-      const newPropietario = {
-        primer_nombre_propietario: form.primer_nombre_propietario,
-        segundo_nombre_propietario: form.segundo_nombre_propietario || null,
-        primer_apellido_propietario: form.primer_apellido_propietario,
-        segundo_apellido_propietario: form.segundo_apellido_propietario,
-        telefono: form.telefono,
-        direccion: form.direccion
-      };
 
-      this.propietarioService.createPropietario(newPropietario).subscribe({
-        next: () => {
-          this.loadPropietarios();
-          this.closeModal();
-        },
-        error: (error: any) => {
-          console.error('Error al crear propietario:', error);
-          alert('Error al crear el propietario');
-        }
-      });
+  } else {
+    // 🔹 CREAR propietario
+    if (!usuario_id_creacion?.trim()) {
+      alert('El campo "Usuario Creación" es obligatorio.');
+      return;
     }
+
+    const newPropietario: CreatePropietarioRequest = {
+      primer_nombre_propietario: primer_nombre_propietario.trim(),
+      segundo_nombre_propietario: segundo_nombre_propietario?.trim() || null,
+      primer_apellido_propietario: primer_apellido_propietario.trim(),
+      segundo_apellido_propietario: segundo_apellido_propietario.trim(),
+      telefono: telefono.trim(),
+      direccion: direccion.trim(),
+      usuario_id_creacion: usuario_id_creacion.trim()
+    };
+
+    this.propietarioService.createPropietario(newPropietario).subscribe({
+      next: () => {
+        this.loadPropietarios();
+        this.closeModal();
+      },
+      error: (error: any) => {
+        console.error('Error al crear propietario:', error);
+        alert('Error al crear el propietario');
+      }
+    });
   }
+}
+
 
   // Eliminar propietario
   deletePropietario(propietario: Propietario): void {

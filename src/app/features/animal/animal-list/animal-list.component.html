@@ -12,22 +12,22 @@
       <!-- Filtro por ID -->
       <div class="filters mb-3">
         <div class="row align-items-center">
-          <div class="col-md-4">
+          <div class="col-md-4 mb-2">
             <input
               type="text"
               class="form-control"
-              placeholder="Buscar por ID de animal (UUID)"
+              placeholder="Buscar por ID de animal"
               [(ngModel)]="filtroId"
             />
           </div>
 
-          <div class="col-md-2">
+          <div class="col-md-2 mb-2">
             <button class="btn btn-primary w-100" (click)="buscarPorId()">
               Buscar
             </button>
           </div>
 
-          <div class="col-md-2">
+          <div class="col-md-2 mb-2">
             <button class="btn btn-secondary w-100" (click)="clearFiltro()">
               Limpiar
             </button>
@@ -35,17 +35,17 @@
         </div>
       </div>
 
-      <!-- Tabla -->
+      <!-- 📋 Tabla de Animales -->
       <div class="table-responsive">
-        <table class="table">
-          <thead>
+        <table class="table table-striped table-hover">
+          <thead class="table-light">
             <tr>
               <th>ID</th>
               <th>Nombre</th>
               <th>Especie</th>
               <th>Fecha Nacimiento</th>
-              <th>Propietario ID</th>
-              <th>Categoría ID</th>
+              <th>ID Propietario</th>
+              <th>ID Categoría</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -58,7 +58,9 @@
 
             <!-- Sin datos -->
             <tr *ngIf="!loading && animales.length === 0">
-              <td colspan="7" class="text-center">No hay animales registrados</td>
+              <td colspan="7" class="text-center">
+                No hay animales registrados
+              </td>
             </tr>
 
             <!-- Datos -->
@@ -71,12 +73,13 @@
               <td>{{ animal.id_animal }}</td>
               <td>{{ animal.nombre_animal }}</td>
               <td>{{ animal.especie_animal }}</td>
-              <td>{{ animal.fecha_nacimiento_animal | date: 'yyyy-MM-dd' }}</td>
+              <td>{{ animal.fecha_nacimiento_animal }}</td>
               <td>{{ animal.propietario_id }}</td>
               <td>{{ animal.categoria_id }}</td>
+
               <td>
                 <button
-                  class="btn btn-sm btn-primary"
+                  class="btn btn-sm btn-primary me-2"
                   (click)="editAnimal(animal)"
                 >
                   Editar
@@ -94,7 +97,7 @@
       </div>
 
       <!-- Paginación -->
-      <div class="pagination mt-3" *ngIf="totalPages > 1">
+      <div class="pagination mt-3 text-center" *ngIf="totalPages > 1">
         <button
           class="btn btn-secondary"
           [disabled]="currentPage === 1"
@@ -102,7 +105,9 @@
         >
           Anterior
         </button>
+
         <span class="mx-3">Página {{ currentPage }} de {{ totalPages }}</span>
+
         <button
           class="btn btn-secondary"
           [disabled]="currentPage === totalPages"
@@ -114,7 +119,7 @@
     </div>
   </div>
 
-  <!-- Modal para crear/editar animal -->
+  <!-- Modal Crear/Editar Animal -->
   <div
     class="modal fade"
     [class.show]="showModal"
@@ -138,79 +143,88 @@
         <div class="modal-body">
           <form (ngSubmit)="saveAnimal()">
             <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label for="nombre_animal">Nombre *</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="nombre_animal"
-                    [(ngModel)]="animalForm.nombre_animal"
-                    name="nombre_animal"
-                    required
-                    placeholder="Ejemplo: Rocky, Luna..."
-                  />
-                </div>
+              <!-- Nombre -->
+              <div class="col-md-6 mb-3">
+                <label>Nombre *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="animalForm.nombre_animal"
+                  name="nombre_animal"
+                  required
+                />
               </div>
 
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label for="especie_animal">Especie *</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="especie_animal"
-                    [(ngModel)]="animalForm.especie_animal"
-                    name="especie_animal"
-                    required
-                    placeholder="Ejemplo: Perro, Gato..."
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label for="fecha_nacimiento_animal">Fecha Nacimiento *</label>
-                  <input
-                    type="date"
-                    class="form-control"
-                    id="fecha_nacimiento_animal"
-                    [(ngModel)]="animalForm.fecha_nacimiento_animal"
-                    name="fecha_nacimiento_animal"
-                    required
-                  />
-                </div>
+              <!-- Especie -->
+              <div class="col-md-6 mb-3">
+                <label>Especie *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="animalForm.especie_animal"
+                  name="especie_animal"
+                  required
+                />
               </div>
 
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label for="propietario_id">Propietario ID *</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="propietario_id"
-                    [(ngModel)]="animalForm.propietario_id"
-                    name="propietario_id"
-                    required
-                    placeholder="UUID del propietario"
-                  />
-                </div>
+              <!-- Fecha Nacimiento -->
+              <div class="col-md-6 mb-3">
+                <label>Fecha de Nacimiento *</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  [(ngModel)]="animalForm.fecha_nacimiento_animal"
+                  name="fecha_nacimiento_animal"
+                  required
+                />
               </div>
-            </div>
 
-            <div class="form-group">
-              <label for="categoria_id">Categoría ID *</label>
-              <input
-                type="text"
-                class="form-control"
-                id="categoria_id"
-                [(ngModel)]="animalForm.categoria_id"
-                name="categoria_id"
-                required
-                placeholder="UUID de la categoría"
-              />
+              <!-- Propietario -->
+              <div class="col-md-6 mb-3">
+                <label>ID Propietario *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="animalForm.propietario_id"
+                  name="propietario_id"
+                  required
+                />
+              </div>
+
+              <!-- Categoría -->
+              <div class="col-md-6 mb-3">
+                <label>ID Categoría *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="animalForm.categoria_id"
+                  name="categoria_id"
+                  required
+                />
+              </div>
+
+              <!-- Usuario Creación -->
+              <div class="col-md-6 mb-3">
+                <label>Usuario Creación *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="animalForm.usuario_id_creacion"
+                  name="usuario_id_creacion"
+                  [readonly]="!!editingAnimal"
+                />
+              </div>
+
+              <!-- Usuario Edición -->
+              <div class="col-md-6 mb-3">
+                <label>Usuario Edición</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="animalForm.usuario_id_edicion"
+                  name="usuario_id_edicion"
+                />
+              </div>
             </div>
           </form>
         </div>

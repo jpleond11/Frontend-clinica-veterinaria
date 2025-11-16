@@ -35,7 +35,7 @@
         </div>
       </div>
 
-      <!-- Tabla de Vacunas -->
+      <!-- 📋 Tabla de Vacunas -->
       <div class="table-responsive">
         <table class="table table-striped table-hover">
           <thead class="table-light">
@@ -44,7 +44,8 @@
               <th>Nombre Vacuna</th>
               <th>Fecha Aplicación</th>
               <th>Próxima Dosis</th>
-              <th>Fecha Creación</th>
+              <th>Usuario Creación</th>
+              <th>Usuario Edición</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -52,12 +53,16 @@
           <tbody>
             <!-- Estado de carga -->
             <tr *ngIf="loading">
+<<<<<<< HEAD
+              <td colspan="7" class="text-center">Cargando...</td>
+=======
               <td colspan="6" class="text-center">Cargando...</td>
+>>>>>>> origin/Prod
             </tr>
 
             <!-- Sin datos -->
             <tr *ngIf="!loading && vacunas.length === 0">
-              <td colspan="6" class="text-center">
+              <td colspan="7" class="text-center">
                 No hay vacunas registradas
               </td>
             </tr>
@@ -73,13 +78,11 @@
               <td>{{ vacuna.nombre_vacuna }}</td>
               <td>{{ vacuna.fecha_aplicacion_vacuna | date: 'yyyy-MM-dd' }}</td>
               <td>
-                {{
-                  vacuna.proxima_dosis_vacuna
-                    ? (vacuna.proxima_dosis_vacuna | date: 'yyyy-MM-dd')
-                    : '-'
-                }}
+                {{ vacuna.proxima_dosis_vacuna ? (vacuna.proxima_dosis_vacuna | date: 'yyyy-MM-dd') : '-' }}
               </td>
-              <td>{{ vacuna.fecha_creacion | date: 'short' }}</td>
+              <td>{{ vacuna.usuario_id_creacion || '-' }}</td>
+              <td>{{ vacuna.usuario_id_edicion || '-' }}</td>
+
               <td>
                 <button
                   class="btn btn-sm btn-primary me-2"
@@ -108,7 +111,9 @@
         >
           Anterior
         </button>
+
         <span class="mx-3">Página {{ currentPage }} de {{ totalPages }}</span>
+
         <button
           class="btn btn-secondary"
           [disabled]="currentPage === totalPages"
@@ -144,20 +149,21 @@
         <div class="modal-body">
           <form (ngSubmit)="saveVacuna()">
             <div class="row">
+              <!-- Nombre Vacuna -->
               <div class="col-md-6 mb-3">
-                <label>Nombre *</label>
+                <label>Nombre Vacuna *</label>
                 <input
                   type="text"
                   class="form-control"
                   [(ngModel)]="vacunaForm.nombre_vacuna"
                   name="nombre_vacuna"
                   required
-                  placeholder="Ingrese el nombre de la vacuna"
                 />
               </div>
 
+              <!-- Fecha Aplicación -->
               <div class="col-md-6 mb-3">
-                <label>Fecha de Aplicación *</label>
+                <label>Fecha Aplicación *</label>
                 <input
                   type="date"
                   class="form-control"
@@ -167,6 +173,7 @@
                 />
               </div>
 
+              <!-- Próxima Dosis -->
               <div class="col-md-6 mb-3">
                 <label>Próxima Dosis</label>
                 <input
@@ -174,6 +181,29 @@
                   class="form-control"
                   [(ngModel)]="vacunaForm.proxima_dosis_vacuna"
                   name="proxima_dosis_vacuna"
+                />
+              </div>
+
+              <!-- Usuario Creación -->
+              <div class="col-md-6 mb-3">
+                <label>Usuario Creación *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="vacunaForm.usuario_id_creacion"
+                  name="usuario_id_creacion"
+                  [readonly]="!!editingVacuna"
+                />
+              </div>
+
+              <!-- Usuario Edición -->
+              <div class="col-md-6 mb-3">
+                <label>Usuario Edición</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="vacunaForm.usuario_id_edicion"
+                  name="usuario_id_edicion"
                 />
               </div>
             </div>

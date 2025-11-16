@@ -23,7 +23,7 @@ export class VeterinarioService {
   getVeterinarios(
     pagination: PaginationParams,
     filters?: VeterinarioFilters
-  ): Observable<PaginatedResponse<Veterinario>> {
+  ): Observable<ApiResponse<Veterinario[]>> {
     let params = new HttpParams()
       .set('skip', ((pagination.page - 1) * pagination.limit).toString())
       .set('limit', pagination.limit.toString());
@@ -37,21 +37,14 @@ export class VeterinarioService {
     }
 
     return this.http.get<Veterinario[]>(this.baseUrl, { params }).pipe(
-      map((veterinarios) => {
-        const total = veterinarios.length;
-        const totalPages = Math.ceil(total / pagination.limit) || 1;
-
-        const response: PaginatedResponse<Veterinario> = {
-          data: veterinarios,
-          total,
-          page: pagination.page,
-          limit: pagination.limit,
-          totalPages
-        };
-        return response;
-      })
-    );
-  }
+          map((veterinarios) => ({
+            data: veterinarios,
+            message: 'Veterinarios obtenidos correctamente',
+            success: true,
+            status: 200
+          }))
+        );
+      }
 
   /**
    * Obtener un veterinario por ID
