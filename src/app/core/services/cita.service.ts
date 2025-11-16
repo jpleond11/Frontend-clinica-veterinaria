@@ -82,6 +82,13 @@ export class CitaService {
   }
 
   /**
+   * Obtener citas en los últimos tres meses
+   */
+  getCitasUltimos3Meses(): Observable<Cita[]> {
+  return this.http.get<Cita[]>(`${this.baseUrl}/ultimos/3-meses`);
+}
+
+  /**
    * Obtener citas asociadas a un animal
    */
   getCitasPorAnimal(animalId: string): Observable<Cita[]> {
